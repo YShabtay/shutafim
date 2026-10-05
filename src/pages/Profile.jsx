@@ -4,9 +4,10 @@ import { api } from '../api'
 import Avatar from '../components/Avatar'
 import NumberInput from '../components/NumberInput'
 import { isComplete } from '../match'
+import { prepareImage } from '../image'
 
 const init = { first_name: '', age: '', gender: '', occupation: '', smoking: 'no', has_pet: false, cleanliness: 'normal',
-  sleep: 'flexible', guests: 'sometimes', kosher: false, bio: '', budget: '', move_date: '' }
+  sleep: 'flexible', guests: 'sometimes', kosher: false, bio: '', budget: '', move_date: '', move_now: false }
 
 export default function Profile({ profile, onSaved }) {
   const [f, setF] = useState(() => ({ ...init, ...(profile || {}), age: profile?.age ? String(profile.age) : '', budget: profile?.budget ? String(profile.budget) : '', move_date: profile?.move_date || '' }))
@@ -19,6 +20,12 @@ export default function Profile({ profile, onSaved }) {
   const set = (k, v) => setF(s => ({ ...s, [k]: v }))
   const bind = k => ({ value: f[k], onChange: e => set(k, e.target.value) })
   const preview = file ? { ...f, photo: URL.createObjectURL(file) } : f
+
+  const pick = async e => {
+    const picked = e.target.files[0]; if (!picked) return
+    setErr('')
+    try { setFile(await prepareImage(picked)) } catch { setErr('לא הצלחנו לקרוא את התמונה. נסו תמונה אחרת.') }
+  }
 
   const submit = async e => {
     e.preventDefault(); setErr('')
@@ -40,7 +47,7 @@ export default function Profile({ profile, onSaved }) {
       {profile?.username && <p className="meta">שם משתמש: <b dir="ltr">@{profile.username}</b> (נשמר לכניסה ולא ניתן לשינוי)</p>}
       <div className="photorow">
         <Avatar profile={preview} size={72} />
-        <label className="btn soft">העלאת תמונה<input type="file" accept="image/*" hidden onChange={e => setFile(e.target.files[0] || null)} /></label>
+        <label className="btn soft">העלאת תמונה<input type="file" accept="image/*" hidden onChange={pick} /></label>
       </div>
 
       <div className="two">
@@ -69,7 +76,9 @@ export default function Profile({ profile, onSaved }) {
       <h3>אם אני מחפש/ת דירה</h3>
       <div className="two">
         <div className="fw"><span>תקציב לחודש (₪)</span><NumberInput step={100} value={f.budget} onChange={v => set('budget', v)} suffix="₪" /></div>
-        <label>תאריך כניסה רצוי<input type="date" {...bind('move_date')} /></label>
+        <div className="fw"><span>תאריך כניסה רצוי</span>
+          <input type="date" disabled={f.move_now} {...bind('move_date')} />
+          <label className="check inline"><input type="checkbox" checked={f.move_now} onChange={e => setF(s => ({ ...s, move_now: e.target.checked, move_date: e.target.checked ? '' : s.move_date }))} /> מוכן/ה להיכנס מיידית</label></div>
       </div>
       {err && <p className="err">{err}</p>}
       <button className="btn primary big" disabled={busy}>{busy ? 'שומר…' : 'שמירה'}</button>

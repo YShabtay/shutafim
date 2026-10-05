@@ -1,5 +1,5 @@
 import Avatar from './Avatar'
-import { OCC, traitChips } from '../labels'
+import { OCC, fmtDate, traitChips } from '../labels'
 export default function ProfileCard({ profile, title, compact = false }) {
   if (!profile) return <p className="meta">אין פרופיל זמין.</p>
   return (
@@ -13,7 +13,10 @@ export default function ProfileCard({ profile, title, compact = false }) {
         </div>
       </div>
       {profile.bio && <p className="prof-bio">{profile.bio}</p>}
-      <div className="chips">{traitChips(profile).map(c => <span key={c}>{c}</span>)}</div>
+      <div className="chips">
+        {profile.move_now ? <span className="chip-hot">מחפש/ת כניסה מיידית</span> : profile.move_date ? <span className="chip-hot">כניסה רצויה {fmtDate(profile.move_date)}</span> : null}
+        {traitChips(profile).map(c => <span key={c}>{c}</span>)}
+      </div>
     </div>
   )
 }

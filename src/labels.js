@@ -24,3 +24,6 @@ export function traitChips(p) {
   if (p.kosher) c.push('שומר/ת כשרות')
   return c.filter(Boolean)
 }
+
+export const fmtDate = iso => (iso ? iso.split('-').reverse().join('.') : '')
+export const entryText = p => (p.available_now ? 'כניסה מיידית' : p.available_from ? `כניסה ${fmtDate(p.available_from)}` : 'כניסה גמישה')

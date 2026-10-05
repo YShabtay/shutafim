@@ -78,7 +78,7 @@ export default function Feed({ profile }) {
       </div>
       {posts === null ? <div className="grid">{[0, 1, 2, 3].map(i => <div key={i} className="skel" />)}</div> :
         shown.length === 0 ? <p className="empty">לא נמצאו דירות. נסו לשנות את הסינון.</p> :
-        <div className="grid">{shown.map(({ p, score }, i) => <PostCard key={p.id} p={p} score={score} index={i} fav={favs.includes(p.id)} onFav={toggleFav} />)}</div>}
+        <div className="grid">{shown.map(({ p, score }, i) => <PostCard key={p.id} p={p} score={score} mine={!!profile && p.owner_id === profile.user_id} index={i} fav={favs.includes(p.id)} onFav={toggleFav} />)}</div>}
 
       <section className="how">
         <h2>איך זה עובד</h2>

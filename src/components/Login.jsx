@@ -26,7 +26,7 @@ const explain = msg => {
   return msg
 }
 
-const IMG = 'https://images.unsplash.com/photo-1758525862263-af89b090fb56?auto=format&fit=crop&w=900&q=70'
+const IMG = 'https://images.unsplash.com/photo-1758525862263-af89b090fb56?auto=format&fit=crop&w=1400&h=1800&q=80'
 
 function Shell({ children }) {
   return (

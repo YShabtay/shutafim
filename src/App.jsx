@@ -9,7 +9,7 @@ import Inbox from './pages/Inbox'
 import Chat from './pages/Chat'
 import Profile from './pages/Profile'
 import Requests from './pages/Requests'
-import Avatar from './components/Avatar'
+import UserMenu from './components/UserMenu'
 import { isComplete } from './match'
 import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
@@ -40,18 +40,18 @@ export default function App() {
       <header className="top">
         <Link to="/" className="logo"><Logo />שותפים</Link>
         <nav>
+          <button className="themebtn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
+            <Icon n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
+          </button>
           {user === null && <>
             <button className="btn ghost" onClick={() => nav('/login')}>התחברות</button>
             <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
           </>}
-          <button className="themebtn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
-            <Icon n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
-          </button>
-          {user && <Link to="/inbox">הודעות</Link>}
-          {user && <Link to="/mine">הפוסטים שלי</Link>}
-          {user && <Link to="/profile" className="me" title="הפרופיל שלי">{isComplete(profile) ? <Avatar profile={profile} size={34} /> : <span className="needprof">השלמת פרופיל</span>}</Link>}
-          <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
-          {user && api.mode === 'supabase' && <button className="btn ghost" onClick={() => api.signOut()}>יציאה</button>}
+          {user && <>
+            <Link to="/inbox" className="themebtn" aria-label="הודעות" title="הודעות"><Icon n="chat" size={18} /></Link>
+            <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
+            <UserMenu profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
+          </>}
         </nav>
       </header>
       {isGuest ? (

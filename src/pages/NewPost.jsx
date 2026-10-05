@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import NumberInput from '../components/NumberInput'
+import { prepareImage } from '../image'
 
-const init = { roommates: [], title: '', city: '', neighborhood: '', rent: '', available_from: '', roommates_total: 2, description: '', socialType: 'none', socialHandle: '',
+const init = { available_now: false, roommates: [], title: '', city: '', neighborhood: '', rent: '', available_from: '', roommates_total: 2, description: '', socialType: 'none', socialHandle: '',
   pref_gender: 'any', pref_age_min: '', pref_age_max: '', pref_smoking: 'any', pref_pets: 'any', pref_kosher: false, pref_occupation: 'any' }
 
 const SOCIAL = { instagram: 'https://instagram.com/', facebook: 'https://facebook.com/', telegram: 'https://t.me/' }
@@ -50,9 +51,11 @@ export default function NewPost() {
         <div className="fw"><span>שכ״ד לחודש (₪)</span><NumberInput required step={100} value={f.rent} onChange={v => set('rent', v)} suffix="₪" /></div>
         <div className="fw"><span>סה״כ דיירים בדירה</span><NumberInput min={2} max={10} value={String(f.roommates_total)} onChange={v => set('roommates_total', v || '2')} /></div>
       </div>
-      <label>תאריך כניסה<input type="date" {...bind('available_from')} /></label>
+      <div className="fw"><span>תאריך כניסה</span>
+        <input type="date" disabled={f.available_now} {...bind('available_from')} />
+        <label className="check inline"><input type="checkbox" checked={f.available_now} onChange={e => setF(s => ({ ...s, available_now: e.target.checked, available_from: e.target.checked ? '' : s.available_from }))} /> כניסה מיידית</label></div>
       <label>תיאור<textarea rows="4" {...bind('description')} /></label>
-      <label>תמונות (עד 6)<input type="file" accept="image/*" multiple onChange={e => setFiles([...e.target.files])} /></label>
+      <label>תמונות (עד 6)<input type="file" accept="image/*" multiple onChange={async e => { setErr(''); try { setFiles(await Promise.all([...e.target.files].map(prepareImage))) } catch { setErr('לא הצלחנו לקרוא אחת התמונות. נסו תמונה אחרת.') } }} /></label>
 
       <h3>הדיירים בדירה</h3>
       <p className="meta">מי כבר גר שם? מי שמגיש בקשה רוצה להכיר גם אותם.</p>

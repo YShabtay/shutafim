@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
-import { prefChips } from '../labels'
+import { fmtDate, prefChips } from '../labels'
 import Icon from '../components/Icon'
 import Placeholder from '../components/Placeholder'
 import ProfileCard from '../components/ProfileCard'
@@ -75,7 +75,7 @@ export default function PostPage({ user, profile }) {
             <div className="meta big"><Icon n="pin" size={17} /> {p.city}{p.neighborhood && ` · ${p.neighborhood}`}</div>
             <div className="facts">
               <div><b>{p.roommates_total}</b><span>דיירים</span></div>
-              <div><b>{p.available_from || 'גמיש'}</b><span>כניסה</span></div>
+              <div><b>{p.available_now ? 'מיידית' : p.available_from ? fmtDate(p.available_from) : 'גמישה'}</b><span>כניסה</span></div>
               <div><b>₪{p.rent.toLocaleString()}</b><span>לחודש</span></div>
             </div>
             {p.description && <><h3>על הדירה</h3><p className="desc">{p.description}</p></>}
