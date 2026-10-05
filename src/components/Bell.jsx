@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useChatDock } from './ChatDock'
 import { NotifIcon, ago, notifText, useOpenNotification } from './notifications'
 import Avatar from './Avatar'
+import { flash } from './flash'
 import Icon from './Icon'
 
 // פעמון: בקשות שממתינות לאישור (אפשר לאשר או לדחות ישר מכאן) ועדכונים על בקשות ששלחתי
@@ -27,6 +28,8 @@ export default function Bell({ notifs }) {
     try {
       const conv = await api.setApplicationStatus(a.id, status)
       await notifs.reload()
+      const who = a.profile?.first_name || 'המבקש/ת'
+      if (status === 'accepted') flash(`הבקשה של ${who} אושרה. הצ'אט נפתח`); else flash(`הבקשה של ${who} נדחתה`, 'no')
       if (status === 'accepted' && conv) { setOpen(false); openChat(conv.id) }
     } finally { setBusy(null) }
   }

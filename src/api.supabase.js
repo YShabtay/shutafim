@@ -130,7 +130,10 @@ export const api = {
     if (status !== 'accepted') return
     const ex = ok(await sb.from('conversations').select('*').eq('post_id', a.post_id).eq('seeker_id', a.applicant_id).maybeSingle())
     if (ex) return ex
-    return ok(await sb.from('conversations').insert({ post_id: a.post_id, owner_id: a.owner_id, seeker_id: a.applicant_id }).select().single())
+    const conv = ok(await sb.from('conversations').insert({ post_id: a.post_id, owner_id: a.owner_id, seeker_id: a.applicant_id }).select().single())
+    // הודעת פתיחה אוטומטית: המבקש רואה מיד שהבקשה אושרה (גם כהתראת הודעה)
+    await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'הבקשה שלך אושרה! נעים להכיר, אפשר להתחיל לדבר.' })
+    return conv
   },
 
   // ---- צ'אט ----

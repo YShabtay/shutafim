@@ -60,8 +60,8 @@ function ChatWindow({ cid, min, onClose, onToggle }) {
       {!min && <>
         <div className="cwin-msgs">
           {conv === null && <p className="meta">השיחה לא נמצאה.</p>}
-          {conv && msgs.length === 0 && <p className="meta">כתבו הודעה ראשונה.</p>}
-          {msgs.map(m => <div key={m.id} className={'bubble ' + (m.sender_id === me?.id ? 'me' : 'them')}>{m.body}</div>)}
+          {conv && <div className="sysmsg"><Icon n="shield" size={14} /> הבקשה לדירה "{conv.title}" אושרה</div>}
+                    {msgs.map(m => <div key={m.id} className={'bubble ' + (m.sender_id === me?.id ? 'me' : 'them')}>{m.body}</div>)}
           <div ref={end} />
         </div>
         {err && <p className="err small">{err}</p>}

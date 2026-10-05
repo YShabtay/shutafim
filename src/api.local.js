@@ -144,7 +144,10 @@ export const api = {
     const apps = read(AK); const a = apps.find(x => x.id === id)
     write(AK, apps.map(x => (x.id === id ? { ...x, status } : x)))
     if (status === 'accepted') {
-      return openConversation(a.post_id, a.owner_id, a.applicant_id, a.applicant_id, 'תודה שאישרת! אשמח לתאם ביקור בדירה.')
+      const isNew = !convFor(a.post_id, a.applicant_id)
+      const conv = openConversation(a.post_id, a.owner_id, a.applicant_id, USER.id, 'הבקשה שלך אושרה! נעים להכיר, אפשר להתחיל לדבר.')
+      if (isNew) setTimeout(() => addMsg(conv.id, a.applicant_id, 'תודה שאישרת! אשמח לתאם ביקור בדירה.'), 1500)
+      return conv
     }
   },
 

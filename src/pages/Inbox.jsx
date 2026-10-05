@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useChatDock } from '../components/ChatDock'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
+import { flash } from '../components/flash'
 import { matchScore, profileToFilter } from '../match'
 
 const STATUS = { pending: 'ממתינה', accepted: 'אושרה', declined: 'נדחתה', withdrawn: 'בוטלה' }
@@ -29,6 +30,8 @@ export default function Inbox() {
   const decide = async (a, status) => {
     const conv = await api.setApplicationStatus(a.id, status)
     await load()
+    const who = a.profile?.first_name || 'המבקש/ת'
+    if (status === 'accepted') flash(`הבקשה של ${who} אושרה. הצ'אט נפתח`); else flash(`הבקשה של ${who} נדחתה`, 'no')
     if (status === 'accepted' && conv) openChat(conv.id)
   }
   if (incoming === null) return <div className="skel tall" />
