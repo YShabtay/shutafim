@@ -122,5 +122,5 @@ create policy "owner update contact" on post_contacts for update
 -- תמונות
 insert into storage.buckets (id, name, public) values ('photos', 'photos', true) on conflict do nothing;
 create policy "public read photos" on storage.objects for select using (bucket_id = 'photos');
-create policy "auth upload photos" on storage.objects for insert
-  with check (bucket_id = 'photos' and auth.uid() is not null);
+create policy "upload to own folder" on storage.objects for insert
+  with check (bucket_id = 'photos' and (storage.foldername(name))[1] = auth.uid()::text);
