@@ -26,7 +26,7 @@ export default function UserMenu({ profile, canSignOut, onSignOut }) {
           {incomplete && <Link to="/profile" className="ucomplete">השלמת פרופיל</Link>}
           <Link to="/profile">הפרופיל שלי</Link>
           <Link to="/mine">הפוסטים שלי</Link>
-          <Link to="/inbox">הודעות ובקשות</Link>
+          <Link to="/inbox">בקשות והודעות</Link>
           {canSignOut && <button onClick={onSignOut}>יציאה</button>}
         </div>
       )}

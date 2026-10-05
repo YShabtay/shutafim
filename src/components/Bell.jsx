@@ -50,9 +50,9 @@ export default function Bell() {
     setOpen(false); setToast(null)
     await api.markNotificationRead(n.id); load()
     if (n.kind === 'message') openChat(n.conversation_id)
-    else if (n.kind === 'application') nav(`/post/${n.post_id}/requests`)
+    else if (n.kind === 'application') nav('/inbox?tab=incoming')
     else if (n.kind === 'accepted') { const a = await api.getMyApplication(n.post_id); a?.conversation_id ? openChat(a.conversation_id) : nav(`/post/${n.post_id}`) }
-    else nav(`/post/${n.post_id}`)
+    else nav('/inbox?tab=sent')
   }
 
   return (

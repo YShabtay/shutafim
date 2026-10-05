@@ -128,6 +128,11 @@ export const api = {
     return read(AK).filter(a => a.post_id === postId && a.owner_id === USER.id)
       .map(a => ({ ...a, profile: profileOf(a.applicant_id), conversation_id: convFor(postId, a.applicant_id)?.id }))
   },
+  async listAllIncoming() {
+    const posts = load()
+    return read(AK).filter(a => a.owner_id === USER.id).sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .map(a => ({ ...a, post: posts.find(p => p.id === a.post_id), profile: profileOf(a.applicant_id), conversation_id: convFor(a.post_id, a.applicant_id)?.id }))
+  },
   async listMyApplications() {
     const posts = load()
     return read(AK).filter(a => a.applicant_id === USER.id).map(a => {

@@ -112,6 +112,13 @@ export const api = {
     const convs = ok(await sb.from('conversations').select('id, seeker_id').eq('post_id', postId)) || []
     return apps.map(a => ({ ...a, profile: profs[a.applicant_id] || null, conversation_id: convs.find(c => c.seeker_id === a.applicant_id)?.id }))
   },
+  async listAllIncoming() {
+    const u = await this.getUser()
+    const apps = ok(await sb.from('applications').select('*, posts(*)').eq('owner_id', u.id).order('created_at', { ascending: false })) || []
+    const profs = await profilesByIds([...new Set(apps.map(a => a.applicant_id))])
+    const convs = ok(await sb.from('conversations').select('id, post_id, seeker_id').eq('owner_id', u.id)) || []
+    return apps.map(a => ({ ...a, post: a.posts, profile: profs[a.applicant_id] || null, conversation_id: convs.find(c => c.post_id === a.post_id && c.seeker_id === a.applicant_id)?.id }))
+  },
   async listMyApplications() {
     const u = await this.getUser()
     const apps = ok(await sb.from('applications').select('*, posts(title, city)').eq('applicant_id', u.id).order('created_at', { ascending: false })) || []

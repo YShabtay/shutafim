@@ -312,3 +312,9 @@ input[type=date]:disabled{opacity:.45}
 .err.small{font-size:12px;margin:0 12px 6px}
 .linkbtn.plain{text-decoration:none;color:var(--ink);font-weight:600;text-align:right;flex:1}
 @media(max-width:640px){.dock{left:0;right:0}.cwin{width:100%;height:72vh;border-radius:16px 16px 0 0}.cwin.min{height:48px}.cwin:not(:last-child){display:none}.toast{left:12px;right:12px;max-width:none}}
+
+/* requests hub */
+.tabs2.three{grid-template-columns:repeat(3,1fr);margin:14px 0}
+.tabs2 .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-inline-start:6px;border-radius:99px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;font-style:normal}
+.forpost{font-size:13px;font-weight:600;color:var(--mute)}
+.inbox .empty{line-height:1.8}
