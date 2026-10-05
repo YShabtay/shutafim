@@ -261,3 +261,10 @@ footer{text-align:right}
 .chip-hot{background:var(--tint)!important;color:var(--brand)!important;border-color:transparent!important;font-weight:700}
 .form .check.inline,.fw .check.inline{flex-direction:row;align-items:center;gap:8px;font-weight:500;margin-top:2px}.fw .check.inline input{width:auto}
 input[type=date]:disabled{opacity:.45}
+
+/* sample listings + empty state */
+.sampletag{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);color:#1b2236;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;z-index:2}
+.sampletag.inline{position:static;display:inline-block;margin-inline-start:10px;vertical-align:middle;background:var(--soft);color:var(--mute);border:1px solid var(--line);font-size:12px}
+.emptystate{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:56px 16px;border:1px dashed var(--line);border-radius:22px;background:var(--soft)}
+.emptystate h3{font-size:20px}.emptystate p{margin:0;color:var(--mute);max-width:380px}
+.actions.center{justify-content:center;margin-top:10px}

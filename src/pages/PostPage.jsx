@@ -39,6 +39,7 @@ export default function PostPage({ user, profile }) {
   }
 
   const contactBox = () => {
+    if (p.is_sample) return <><p className="meta"><b>זו דירה לדוגמה.</b> היא נוצרה כדי להמחיש איך האתר נראה, ואי אפשר להגיש לה בקשה.</p><Link className="btn primary big" to="/">חזרה לדירות</Link><Link className="btn soft big" to="/new">פרסמו דירה אמיתית</Link></>
     if (mine) return <><p className="meta">זה הפוסט שלך.</p><Link className="btn primary big" to={`/post/${id}/requests`}>צפייה בבקשות</Link></>
     if (!user) return <><p className="meta">התחברו כדי להגיש בקשה לדירה.</p><Link className="btn primary big" to="/new">התחברות</Link></>
     if (!isComplete(profile)) return <><p className="meta">כדי להגיש בקשה צריך פרופיל קצר, כך שבעל הדירה יכיר אתכם.</p><Link className="btn primary big" to={`/profile?next=/post/${id}`}>יצירת פרופיל</Link></>
@@ -71,7 +72,7 @@ export default function PostPage({ user, profile }) {
           </> : <Placeholder id={p.id} className="gallery" />}
 
           <div className="detail">
-            <h1>{p.title}</h1>
+            <h1>{p.title}{p.is_sample && <span className="sampletag inline">דוגמה</span>}</h1>
             <div className="meta big"><Icon n="pin" size={17} /> {p.city}{p.neighborhood && ` · ${p.neighborhood}`}</div>
             <div className="facts">
               <div><b>{p.roommates_total}</b><span>דיירים</span></div>

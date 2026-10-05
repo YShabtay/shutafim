@@ -11,6 +11,7 @@ export default function PostCard({ p, score, fav, onFav, mine = false, index = 0
     <Link to={`/post/${p.id}`} className="pcard" style={{ animationDelay: `${index * 50}ms` }}>
       <div className="thumb">
         {photo ? <img src={photo} alt="" loading="lazy" /> : <Placeholder id={p.id} />}
+        {p.is_sample && <span className="sampletag">דוגמה</span>}
         {mine ? <span className="badge mine">הפוסט שלך</span> : isNew(p) && <span className="badge">חדש</span>}
         {!mine && <button className={'heart' + (fav ? ' on' : '')} aria-label="שמור" onClick={e => { e.preventDefault(); onFav(p.id) }}>
           <Icon n="heart" size={22} fill={fav} />

@@ -34,7 +34,7 @@ export default function Feed({ profile }) {
       return true
     })
     .map(p => ({ p, score: matchScore(p, f) }))
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0)), [posts, f, onlyFavs, favs])
+    .sort((a, b) => (a.p.is_sample ? 1 : 0) - (b.p.is_sample ? 1 : 0) || (b.score ?? 0) - (a.score ?? 0)), [posts, f, onlyFavs, favs])
 
   return (
     <>
@@ -77,7 +77,16 @@ export default function Feed({ profile }) {
         {posts && <span className="meta">{shown.length} תוצאות</span>}
       </div>
       {posts === null ? <div className="grid">{[0, 1, 2, 3].map(i => <div key={i} className="skel" />)}</div> :
-        shown.length === 0 ? <p className="empty">לא נמצאו דירות. נסו לשנות את הסינון.</p> :
+        shown.length === 0 ? (
+          <div className="emptystate">
+            <span className="bigico"><Icon n="search" size={30} /></span>
+            <h3>{filtered ? 'לא מצאנו דירות שמתאימות' : 'עדיין אין דירות באתר'}</h3>
+            <p>{filtered ? 'נסו להרחיב את החיפוש או לנקות את הסינון.' : 'היו הראשונים לפרסם חדר פנוי ולמצוא שותפים.'}</p>
+            <div className="actions center">
+              {filtered && <button className="btn soft" onClick={() => { setF(empty); setOnlyFavs(false) }}>ניקוי סינון</button>}
+              <Link to="/new" className="btn primary">פרסמו דירה</Link>
+            </div>
+          </div>) :
         <div className="grid">{shown.map(({ p, score }, i) => <PostCard key={p.id} p={p} score={score} mine={!!profile && p.owner_id === profile.user_id} index={i} fav={favs.includes(p.id)} onFav={toggleFav} />)}</div>}
 
       <section className="how">
