@@ -4,7 +4,7 @@ import Avatar from './Avatar'
 import Icon from './Icon'
 import { isComplete } from '../match'
 
-export default function UserMenu({ profile, canSignOut, onSignOut }) {
+export default function UserMenu({ profile, pending = 0, canSignOut, onSignOut }) {
   const [open, setOpen] = useState(false)
   const ref = useRef()
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function UserMenu({ profile, canSignOut, onSignOut }) {
           {incomplete && <Link to="/profile" className="ucomplete">השלמת פרופיל</Link>}
           <Link to="/profile">הפרופיל שלי</Link>
           <Link to="/mine">הפוסטים שלי</Link>
-          <Link to="/inbox">בקשות והודעות</Link>
+          <Link to="/inbox" className="withcnt">בקשות והודעות{pending > 0 && <i className="cnt">{pending}</i>}</Link>
           {canSignOut && <button onClick={onSignOut}>יציאה</button>}
         </div>
       )}

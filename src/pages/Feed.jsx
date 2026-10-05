@@ -11,7 +11,7 @@ import { useFavs } from '../favs'
 
 const empty = { q: '', maxRent: '', gender: 'any', smoking: 'any', pets: 'any', occ: 'any', age: '' }
 
-export default function Feed({ profile }) {
+export default function Feed({ profile, pending = 0 }) {
   const [posts, setPosts] = useState(null)
   const [f, setF] = useState(empty)
   const [open, setOpen] = useState(false)
@@ -48,6 +48,13 @@ export default function Feed({ profile }) {
 
   return (
     <>
+      {pending > 0 && (
+        <Link to="/inbox?tab=incoming" className="reqbanner">
+          <Icon n="users" size={18} />
+          <span>{pending === 1 ? 'יש לך בקשה אחת שממתינה לאישור' : `יש לך ${pending} בקשות שממתינות לאישור`}</span>
+          <b>לאישור</b>
+        </Link>
+      )}
       <HeroCarousel>
         <h1>מצאו את <span className="hl">השותפים הנכונים</span> לדירה</h1>
         <p>דירות עם חדר פנוי, קריטריונים ברורים, וצ'אט ישיר עם הדיירים. חינם לגמרי.</p>

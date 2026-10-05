@@ -28,7 +28,7 @@ export default function App() {
   const nav = useNavigate()
   const notifs = useNotifications(!!user)
   const msgs = useConversations(user?.id)
-  const totalUnread = notifs.list.filter(n => !n.read).length + msgs.unread.size
+  const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined')).length + msgs.unread.size
   useEffect(() => { document.title = (totalUnread ? `(${totalUnread}) ` : '') + 'שותפים – מצאו שותפים לדירה' }, [totalUnread])
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light')
   const toggleTheme = () => {
@@ -60,7 +60,7 @@ export default function App() {
             <MessagesMenu msgs={msgs} />
             <Bell notifs={notifs} />
             <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
-            <UserMenu profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
+            <UserMenu pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
           </>}
         </nav>
       </header>
@@ -75,7 +75,7 @@ export default function App() {
       ) : null}
       <main>
         <Routes>
-          <Route path="/" element={<Feed profile={profile} />} />
+          <Route path="/" element={<Feed profile={profile} pending={notifs.requests.length} />} />
           <Route path="/post/:id" element={<PostPage user={user} profile={profile} />} />
           <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
           <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />

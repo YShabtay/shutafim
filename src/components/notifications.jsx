@@ -23,6 +23,7 @@ export function NotifIcon({ kind }) {
 // מצב ההתראות במקום אחד: משמש גם את הפעמון (בקשות) וגם את אייקון ההודעות
 export function useNotifications(enabled) {
   const [list, setList] = useState([])
+  const [requests, setRequests] = useState([]) // בקשות שממתינות לאישור שלי, מכל הדירות
   const [toast, setToast] = useState(null)
   const seen = useRef(null)
 
@@ -30,6 +31,7 @@ export function useNotifications(enabled) {
     let l
     try { l = (await api.listNotifications()).filter(n => n.kind !== 'message') } catch { return } // הודעות מחושבות בנפרד, מהשיחות עצמן
     setList(l)
+    try { setRequests((await api.listAllIncoming()).filter(a => a.status === 'pending')) } catch {}
     const keys = l.filter(n => !n.read).map(n => n.id + '|' + n.created_at)
     if (seen.current === null) { seen.current = new Set(keys); return }
     const fresh = l.find(n => !n.read && !seen.current.has(n.id + '|' + n.created_at))
@@ -37,10 +39,10 @@ export function useNotifications(enabled) {
     if (fresh) { setToast(fresh); setTimeout(() => setToast(t => (t === fresh ? null : t)), 7000) }
   }
   useEffect(() => {
-    if (!enabled) { setList([]); seen.current = null; return }
+    if (!enabled) { setList([]); setRequests([]); seen.current = null; return }
     load(); return api.subscribeNotifications(load)
   }, [enabled])
-  return { list, reload: load, toast, setToast }
+  return { list, requests, reload: load, toast, setToast }
 }
 
 // פותח את מה שההתראה מצביעה עליו
