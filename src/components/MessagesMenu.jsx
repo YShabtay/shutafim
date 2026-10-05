@@ -1,21 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api } from '../api'
 import { useChatDock } from './ChatDock'
 import { ago } from './notifications'
 import Avatar from './Avatar'
 import Icon from './Icon'
 
 // אייקון הודעות בכותרת, כמו במסנג'ר: רשימת השיחות, ולחיצה פותחת חלון צ'אט בפינה
-export default function MessagesMenu({ notifs }) {
+export default function MessagesMenu({ msgs }) {
   const { openChat } = useChatDock()
   const [open, setOpen] = useState(false)
-  const [convs, setConvs] = useState(null)
   const wrap = useRef()
-  const unreadConvs = new Set(notifs.list.filter(n => n.kind === 'message' && !n.read).map(n => n.conversation_id))
-  const stamp = notifs.list.filter(n => n.kind === 'message').map(n => n.id + n.created_at).join()
-  const refresh = () => api.listConversations().then(setConvs).catch(() => setConvs([]))
-  useEffect(() => { if (open) refresh() }, [open, stamp])
+  const convs = msgs.convs
+  const unreadConvs = msgs.unread
+  useEffect(() => { if (open) msgs.reload() }, [open])
   useEffect(() => {
     const close = e => { if (!wrap.current?.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', close); return () => document.removeEventListener('mousedown', close)
@@ -29,10 +26,9 @@ export default function MessagesMenu({ notifs }) {
       {open && (
         <div className="belldrop">
           <div className="bellhead"><b>הודעות</b><Link to="/inbox?tab=chats" onClick={() => setOpen(false)}>לכל ההודעות</Link></div>
-          {convs === null && <p className="meta bellempty">טוען…</p>}
-          {convs?.length === 0 && <p className="meta bellempty">אין שיחות עדיין. שיחה נפתחת אחרי שבקשה אושרה.</p>}
+                    {convs.length === 0 && <p className="meta bellempty">אין שיחות עדיין. שיחה נפתחת אחרי שבקשה אושרה.</p>}
           <div className="belllist">
-            {convs?.map(c => (
+            {convs.map(c => (
               <button key={c.id} className={'bellitem convitem' + (unreadConvs.has(c.id) ? ' unread' : '')} onClick={() => { setOpen(false); openChat(c.id) }}>
                 <Avatar profile={c.other || { first_name: '?' }} size={40} />
                 <span className="belltext">

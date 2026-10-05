@@ -167,6 +167,7 @@ export const api = {
     const other = c.owner_id === USER.id ? c.seeker_id : c.owner_id
     setTimeout(() => addMsg(cid, other, 'תודה על ההודעה! (תשובה אוטומטית של מצב הדמו)'), 1200)
   },
+  subscribeAllMessages(cb) { const t = setInterval(cb, 1500); return () => clearInterval(t) },
   subscribe(cid, cb) { const t = setInterval(() => this.listMessages(cid).then(cb), 1000); return () => clearInterval(t) },
 
   // ---- התראות ----

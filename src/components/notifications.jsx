@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useChatDock } from './ChatDock'
 import Icon from './Icon'
+import { markSeen } from '../seen'
 
 export const notifText = n => {
   const who = n.actor_name || 'מישהו'
@@ -21,17 +22,13 @@ export function NotifIcon({ kind }) {
 
 // מצב ההתראות במקום אחד: משמש גם את הפעמון (בקשות) וגם את אייקון ההודעות
 export function useNotifications(enabled) {
-  const { isOpen } = useChatDock()
   const [list, setList] = useState([])
   const [toast, setToast] = useState(null)
   const seen = useRef(null)
-  const isOpenRef = useRef(isOpen); isOpenRef.current = isOpen
 
   const load = async () => {
     let l
-    try { l = await api.listNotifications() } catch { return }
-    const open_ = l.filter(n => !n.read && n.kind === 'message' && isOpenRef.current(n.conversation_id)) // שיחה שפתוחה כבר נקראה
-    if (open_.length) { open_.forEach(n => api.markConversationRead(n.conversation_id)); open_.forEach(n => { n.read = true }) }
+    try { l = (await api.listNotifications()).filter(n => n.kind !== 'message') } catch { return } // הודעות מחושבות בנפרד, מהשיחות עצמן
     setList(l)
     const keys = l.filter(n => !n.read).map(n => n.id + '|' + n.created_at)
     if (seen.current === null) { seen.current = new Set(keys); return }
@@ -64,4 +61,15 @@ export function Toast({ notifs }) {
   const n = notifs.toast
   if (!n) return null
   return <button className="toast" onClick={() => { notifs.setToast(null); open(n) }}><NotifIcon kind={n.kind} /><span className="belltext">{notifText(n)}</span></button>
+}
+
+export function MessageToast({ msgs, userId }) {
+  const { openChat } = useChatDock()
+  const t = msgs.toast
+  if (!t) return null
+  return (
+    <button className="toast second" onClick={() => { msgs.setToast(null); markSeen(userId, t.conversation_id, t.key); openChat(t.conversation_id) }}>
+      <NotifIcon kind="message" /><span className="belltext">הודעה חדשה מ-<b>{t.actor_name || 'משתמש'}</b></span>
+    </button>
+  )
 }

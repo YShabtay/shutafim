@@ -12,7 +12,8 @@ import Requests from './pages/Requests'
 import UserMenu from './components/UserMenu'
 import Bell from './components/Bell'
 import MessagesMenu from './components/MessagesMenu'
-import { Toast, useNotifications } from './components/notifications'
+import { MessageToast, Toast, useNotifications } from './components/notifications'
+import { useConversations } from './components/useConversations'
 import { isComplete } from './match'
 import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
@@ -25,6 +26,9 @@ export default function App() {
   const [profile, setProfile] = useState(undefined)
   const nav = useNavigate()
   const notifs = useNotifications(!!user)
+  const msgs = useConversations(user?.id)
+  const totalUnread = notifs.list.filter(n => !n.read).length + msgs.unread.size
+  useEffect(() => { document.title = (totalUnread ? `(${totalUnread}) ` : '') + 'שותפים – מצאו שותפים לדירה' }, [totalUnread])
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light')
   const toggleTheme = () => {
     const t = theme === 'dark' ? 'light' : 'dark'
@@ -52,7 +56,7 @@ export default function App() {
             <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
           </>}
           {user && <>
-            <MessagesMenu notifs={notifs} />
+            <MessagesMenu msgs={msgs} />
             <Bell notifs={notifs} />
             <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
             <UserMenu profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
@@ -60,6 +64,7 @@ export default function App() {
         </nav>
       </header>
       {user && <Toast notifs={notifs} />}
+      {user && <MessageToast msgs={msgs} userId={user.id} />}
       {isGuest ? (
         <div className="demo">מצב אורח: הכול נשמר רק בדפדפן שלכם ואף אחד אחר לא רואה את זה. <button className="linkbtn" onClick={exitGuest}>יציאה ממצב אורח</button></div>
       ) : api.mode === 'demo' ? (

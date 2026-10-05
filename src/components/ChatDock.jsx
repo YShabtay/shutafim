@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import Avatar from './Avatar'
 import Icon from './Icon'
+import { markSeen } from '../seen'
 
 const Ctx = createContext({ openChat: () => {}, isOpen: () => false })
 export const useChatDock = () => useContext(Ctx)
@@ -36,6 +37,10 @@ function ChatWindow({ cid, min, onClose, onToggle }) {
     return api.subscribe(cid, m => { setMsgs(m); api.markConversationRead(cid) })
   }, [cid])
   useEffect(() => { if (!min) end.current?.scrollIntoView({ block: 'end' }) }, [msgs, min])
+  useEffect(() => { // שיחה פתוחה ולא ממוזערת: ההודעות נקראו
+    const last = msgs[msgs.length - 1]
+    if (!min && me && last) markSeen(me.id, cid, last.created_at)
+  }, [msgs, min, me])
 
   const send = async e => {
     e.preventDefault()

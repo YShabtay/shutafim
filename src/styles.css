@@ -325,3 +325,4 @@ input[type=date]:disabled{opacity:.45}
 .convitem .preview{color:var(--mute);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
 .convitem.unread .preview{color:var(--ink);font-weight:600}
 .appcard.focus{outline:2px solid var(--brand);outline-offset:2px}
+.toast.second{top:140px}

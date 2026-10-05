@@ -139,7 +139,7 @@ export const api = {
     const data = ok(await sb.from('conversations').select('*, posts(title)')) || []
     const ids = data.map(c => c.id)
     const profs = await profilesByIds(data.map(c => (c.owner_id === u.id ? c.seeker_id : c.owner_id)))
-    const msgs = ids.length ? ok(await sb.from('messages').select('conversation_id, body, sender_id, created_at').in('conversation_id', ids).order('created_at', { ascending: false }).limit(300)) || [] : []
+    const msgs = ids.length ? ok(await sb.from('messages').select('id, conversation_id, body, sender_id, created_at').in('conversation_id', ids).order('created_at', { ascending: false }).limit(300)) || [] : []
     return data.map(c => ({
       ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker',
       other: profs[c.owner_id === u.id ? c.seeker_id : c.owner_id] || null, last: msgs.find(m => m.conversation_id === c.id) || null,
@@ -156,6 +156,11 @@ export const api = {
   async sendMessage(cid, body) {
     const u = await this.getUser()
     ok(await sb.from('messages').insert({ conversation_id: cid, sender_id: u.id, body }))
+  },
+  subscribeAllMessages(cb) {
+    const ch = sb.channel('allmsgs-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, cb).subscribe()
+    const t = setInterval(cb, 15000) // גיבוי למקרה שהחיבור בזמן אמת נפל
+    return () => { clearInterval(t); sb.removeChannel(ch) }
   },
   subscribe(cid, cb) {
     const ch = sb.channel('msgs-' + cid)
