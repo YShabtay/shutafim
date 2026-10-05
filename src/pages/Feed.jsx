@@ -4,6 +4,7 @@ import { api } from '../api'
 import PostCard from '../components/PostCard'
 import Icon from '../components/Icon'
 import HeroCarousel from '../components/HeroCarousel'
+import MoreCities from '../components/MoreCities'
 import NumberInput from '../components/NumberInput'
 import { hasProfile, matchScore, profileToFilter } from '../match'
 import { useFavs } from '../favs'
@@ -21,7 +22,16 @@ export default function Feed({ profile }) {
   useEffect(() => { if (profile) setF(s => ({ ...s, ...profileToFilter(profile) })) }, [profile?.user_id, profile?.age])
   const set = (k, v) => setF(s => ({ ...s, [k]: v }))
 
-  const cities = useMemo(() => [...new Set((posts || []).map(p => p.city))], [posts])
+  // ערים לפי מספר הדירות: החמש הראשונות כפתורים, השאר תחת "עוד ערים"
+  const cities = useMemo(() => {
+    const count = {}
+    for (const p of posts || []) count[p.city] = (count[p.city] || 0) + 1
+    return Object.entries(count).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'he'))
+  }, [posts])
+  const TOP = 5
+  const topCities = cities.slice(0, TOP)
+  const restCities = cities.slice(TOP)
+  const pickedExtra = restCities.find(c => c.name === f.q) // עיר שנבחרה מהרשימה הארוכה מוצגת ככפתור פעיל
   const matched = hasProfile(f)
   const filtered = f.q || f.maxRent || matched || onlyFavs
 
@@ -49,12 +59,14 @@ export default function Feed({ profile }) {
       </HeroCarousel>
 
       <div className="pills">
-        <button className={'pill' + (open || matched ? ' on' : '')} onClick={() => setOpen(o => !o)}>
+        <button className={'pill' + (open ? ' on' : '')} onClick={() => setOpen(o => !o)}>
           <Icon n="sliders" size={16} /> ההתאמה שלי{matched && <i className="dot" />}
         </button>
-        <span className="sep" />
-        {cities.map(c => <button key={c} className={'pill' + (f.q === c ? ' on' : '')} onClick={() => set('q', f.q === c ? '' : c)}>{c}</button>)}
         <button className={'pill' + (onlyFavs ? ' on' : '')} onClick={() => setOnlyFavs(v => !v)}><Icon n="heart" size={15} fill={onlyFavs} /> שמורים{favs.length ? ` ${favs.length}` : ''}</button>
+        <span className="sep" />
+        {topCities.map(c => <button key={c.name} className={'pill' + (f.q === c.name ? ' on' : '')} onClick={() => set('q', f.q === c.name ? '' : c.name)}>{c.name}</button>)}
+        {pickedExtra && <button className="pill on" onClick={() => set('q', '')}>{pickedExtra.name} <Icon n="x" size={13} /></button>}
+        {restCities.length > 0 && <MoreCities cities={restCities} selected={f.q} onPick={name => set('q', name)} />}
         {filtered && <button className="pill clear" onClick={() => { setF(empty); setOnlyFavs(false) }}><Icon n="x" size={14} /> נקה</button>}
       </div>
 
