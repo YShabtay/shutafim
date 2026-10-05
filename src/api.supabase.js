@@ -127,12 +127,13 @@ export const api = {
   },
   async setApplicationStatus(id, status) {
     const a = ok(await sb.from('applications').update({ status }).eq('id', id).select().single())
-    if (status !== 'accepted') return
-    const ex = ok(await sb.from('conversations').select('*').eq('post_id', a.post_id).eq('seeker_id', a.applicant_id).maybeSingle())
-    if (ex) return ex
-    const conv = ok(await sb.from('conversations').insert({ post_id: a.post_id, owner_id: a.owner_id, seeker_id: a.applicant_id }).select().single())
-    // הודעת פתיחה אוטומטית: המבקש רואה מיד שהבקשה אושרה (גם כהתראת הודעה)
-    await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'הבקשה שלך אושרה! נעים להכיר, אפשר להתחיל לדבר.' })
+    if (status === 'declined') return
+    let conv = ok(await sb.from('conversations').select('*').eq('post_id', a.post_id).eq('seeker_id', a.applicant_id).maybeSingle())
+    if (!conv) {
+      conv = ok(await sb.from('conversations').insert({ post_id: a.post_id, owner_id: a.owner_id, seeker_id: a.applicant_id }).select().single())
+      await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'היי! ראיתי את הבקשה שלך ואשמח להכיר. בוא/י נדבר.' })
+    }
+    if (status === 'accepted') await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'מזל טוב, אושרת כשותף/ה לדירה!' })
     return conv
   },
 
@@ -153,7 +154,8 @@ export const api = {
     const c = ok(await sb.from('conversations').select('*, posts(title)').eq('id', id).maybeSingle())
     if (!c) return null
     const other = await this.getProfile(c.owner_id === u.id ? c.seeker_id : c.owner_id)
-    return { ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker', other }
+    const application = ok(await sb.from('applications').select('id, status').eq('post_id', c.post_id).eq('applicant_id', c.seeker_id).maybeSingle())
+    return { ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker', other, application }
   },
   async listMessages(cid) { return ok(await sb.from('messages').select('*').eq('conversation_id', cid).order('created_at')) || [] },
   async sendMessage(cid, body) {

@@ -4,11 +4,11 @@ import { api } from '../api'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
 import { useChatDock } from '../components/ChatDock'
-import { flash } from '../components/flash'
+import { decide as decideApp, STATUS } from '../components/decide'
 import { matchScore, profileToFilter } from '../match'
 
-const STATUS = { pending: 'ממתינה', accepted: 'אושרה', declined: 'נדחתה', withdrawn: 'בוטלה' }
 
+const ORDER = { pending: 0, chatting: 1, accepted: 2, declined: 3, withdrawn: 4 }
 export default function Requests() {
   const { id } = useParams()
   const [post, setPost] = useState(undefined)
@@ -19,16 +19,9 @@ export default function Requests() {
 
   const list = useMemo(() => (apps || [])
     .map(a => ({ ...a, score: post && a.profile ? matchScore(post, profileToFilter(a.profile)) : null }))
-    .sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1) || (b.score ?? 0) - (a.score ?? 0)), [apps, post])
+    .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (b.score ?? 0) - (a.score ?? 0)), [apps, post])
 
-  const decide = async (a, status) => {
-    const conv = await api.setApplicationStatus(a.id, status)
-    await load()
-    const who = a.profile?.first_name || 'המבקש/ת'
-    if (status === 'accepted') flash(`הבקשה של ${who} אושרה. הצ'אט נפתח`); else flash(`הבקשה של ${who} נדחתה`, 'no')
-    if (status === 'accepted' && conv) openChat(conv.id)
-  }
-
+  const decide = (a, status) => decideApp(a, status, { openChat, reload: load })
   if (post === undefined || apps === null) return <div className="skel tall" />
   return (
     <div className="narrow wide">
@@ -46,7 +39,12 @@ export default function Requests() {
           {a.message && <blockquote className="msg">{a.message}</blockquote>}
           <div className="actions">
             {a.status === 'pending' && <>
-              <button className="btn primary" onClick={() => decide(a, 'accepted')}>אישור ופתיחת צ'אט</button>
+              <button className="btn primary" onClick={() => decide(a, 'chatting')}>שיחה</button>
+              <button className="btn ghost" onClick={() => decide(a, 'declined')}>דחייה</button>
+            </>}
+            {a.status === 'chatting' && <>
+              <button className="btn soft" onClick={() => openChat(a.conversation_id)}><Icon n="chat" size={16} /> לצ'אט</button>
+              <button className="btn primary" onClick={() => decide(a, 'accepted')}>אישור כניסה לדירה</button>
               <button className="btn ghost" onClick={() => decide(a, 'declined')}>דחייה</button>
             </>}
             {a.status === 'accepted' && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}><Icon n="chat" size={16} /> לצ'אט</button>}

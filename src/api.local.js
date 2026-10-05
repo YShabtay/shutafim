@@ -112,12 +112,17 @@ export const api = {
     if (read(AK).some(a => a.post_id === postId && a.applicant_id === USER.id)) throw new Error('כבר הגשת בקשה לדירה הזו')
     const app = { id: crypto.randomUUID(), post_id: postId, owner_id: post.owner_id, applicant_id: USER.id, message, status: 'pending', created_at: new Date().toISOString() }
     write(AK, [...read(AK), app])
-    // דמו: בעל הדירה מאשר אחרי כמה שניות כדי שתוכלו לראות את הזרימה
+    // דמו: בעל הדירה פותח שיחה אחרי כמה שניות, ומאשר סופית אחרי עוד קצת, כדי שתוכלו לראות את הזרימה
+    setTimeout(() => {
+      write(AK, read(AK).map(a => (a.id === app.id ? { ...a, status: 'chatting' } : a)))
+      addNotif({ kind: 'chatting', post_id: postId, post_title: post.title, actor_name: PEOPLE[post.owner_id]?.first_name || '' })
+      openConversation(postId, post.owner_id, USER.id, post.owner_id, 'היי! ראיתי את הבקשה שלך ואשמח להכיר. מתי נוח לך לבוא לראות את הדירה?')
+    }, 4000)
     setTimeout(() => {
       write(AK, read(AK).map(a => (a.id === app.id ? { ...a, status: 'accepted' } : a)))
       addNotif({ kind: 'accepted', post_id: postId, post_title: post.title, actor_name: PEOPLE[post.owner_id]?.first_name || '' })
-      openConversation(postId, post.owner_id, USER.id, post.owner_id, 'היי! אישרתי את הבקשה שלך. נשמח להכיר, מתי נוח לך לבוא לראות את הדירה?')
-    }, 4000)
+      const c = convFor(postId, USER.id); if (c) addMsg(c.id, post.owner_id, 'מזל טוב, אושרת כשותף/ה לדירה!')
+    }, 16000)
     return app
   },
   async getMyApplication(postId) {
@@ -143,12 +148,12 @@ export const api = {
   async setApplicationStatus(id, status) {
     const apps = read(AK); const a = apps.find(x => x.id === id)
     write(AK, apps.map(x => (x.id === id ? { ...x, status } : x)))
-    if (status === 'accepted') {
-      const isNew = !convFor(a.post_id, a.applicant_id)
-      const conv = openConversation(a.post_id, a.owner_id, a.applicant_id, USER.id, 'הבקשה שלך אושרה! נעים להכיר, אפשר להתחיל לדבר.')
-      if (isNew) setTimeout(() => addMsg(conv.id, a.applicant_id, 'תודה שאישרת! אשמח לתאם ביקור בדירה.'), 1500)
-      return conv
-    }
+    if (status === 'declined') return
+    const isNew = !convFor(a.post_id, a.applicant_id)
+    const conv = openConversation(a.post_id, a.owner_id, a.applicant_id, USER.id, 'היי! ראיתי את הבקשה שלך ואשמח להכיר. בוא/י נדבר.')
+    if (isNew) setTimeout(() => addMsg(conv.id, a.applicant_id, 'תודה שפנית אליי! אשמח לתאם ביקור בדירה.'), 1500)
+    if (status === 'accepted') addMsg(conv.id, USER.id, 'מזל טוב, אושרת כשותף/ה לדירה!')
+    return conv
   },
 
   // ---- צ'אט (דמו: הצד השני עונה אוטומטית) ----
@@ -161,7 +166,8 @@ export const api = {
   },
   async getConversation(id) {
     const c = read(CK).find(x => x.id === id); if (!c) return null
-    return { ...withTitle(c), other: profileOf(c.owner_id === USER.id ? c.seeker_id : c.owner_id) }
+    const application = read(AK).find(x => x.post_id === c.post_id && x.applicant_id === c.seeker_id) || null
+    return { ...withTitle(c), other: profileOf(c.owner_id === USER.id ? c.seeker_id : c.owner_id), application: application && { id: application.id, status: application.status } }
   },
   async listMessages(cid) { return read(MK).filter(m => m.conversation_id === cid) },
   async sendMessage(cid, body) {

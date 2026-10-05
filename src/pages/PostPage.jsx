@@ -46,8 +46,12 @@ export default function PostPage({ user, profile }) {
     if (!user) return <><p className="meta">התחברו כדי להגיש בקשה לדירה.</p><Link className="btn primary big" to="/new">התחברות</Link></>
     if (!isComplete(profile)) return <><p className="meta">כדי להגיש בקשה צריך פרופיל קצר, כך שבעל הדירה יכיר אתכם.</p><Link className="btn primary big" to={`/profile?next=/post/${id}`}>יצירת פרופיל</Link></>
     if (app === undefined) return <div className="skel" style={{ height: 120 }} />
+    if (app?.status === 'chatting') return <>
+      <p className="meta"><b>בעל הדירה פתח איתך שיחה.</b> זה שלב היכרות, וההחלטה הסופית עוד לא התקבלה.</p>
+      {app.conversation_id && <button className="btn primary big" onClick={() => openChat(app.conversation_id)}><Icon n="chat" size={18} /> לצ'אט עם בעל הדירה</button>}
+    </>
     if (app?.status === 'accepted') return <>
-      <p className="ok"><Icon n="shield" size={16} /> הבקשה אושרה!</p>
+      <p className="ok"><Icon n="shield" size={16} /> אושרת כשותף/ה לדירה!</p>
       {app.conversation_id && <button className="btn primary big" onClick={() => openChat(app.conversation_id)}><Icon n="chat" size={18} /> לצ'אט עם בעל הדירה</button>}
       {social && <a className="btn soft big" href={social} target="_blank" rel="noreferrer noopener"><Icon n="link" size={17} /> פרופיל ברשת חברתית</a>}
     </>

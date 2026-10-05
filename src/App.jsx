@@ -29,7 +29,7 @@ export default function App() {
   const nav = useNavigate()
   const notifs = useNotifications(!!user)
   const msgs = useConversations(user?.id)
-  const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined')).length + msgs.unread.size
+  const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length + msgs.unread.size
   useEffect(() => { document.title = (totalUnread ? `(${totalUnread}) ` : '') + 'שותפים – מצאו שותפים לדירה' }, [totalUnread])
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'light')
   const toggleTheme = () => {

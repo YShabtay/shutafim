@@ -4,11 +4,11 @@ import { api } from '../api'
 import { useChatDock } from '../components/ChatDock'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
-import { flash } from '../components/flash'
+import { decide as decideApp, STATUS } from '../components/decide'
 import { matchScore, profileToFilter } from '../match'
 
-const STATUS = { pending: 'ממתינה', accepted: 'אושרה', declined: 'נדחתה', withdrawn: 'בוטלה' }
 
+const ORDER = { pending: 0, chatting: 1, accepted: 2, declined: 3, withdrawn: 4 }
 // מרכז אחד: בקשות שהגיעו אליי מכל הדירות, בקשות ששלחתי, ושיחות
 export default function Inbox() {
   const { openChat } = useChatDock()
@@ -25,15 +25,9 @@ export default function Inbox() {
   const tab = q.get('tab') || (pending || !(sent.length || convs.length) ? 'incoming' : sent.length ? 'sent' : 'chats')
   const list = useMemo(() => (incoming || [])
     .map(a => ({ ...a, score: a.post && a.profile ? matchScore(a.post, profileToFilter(a.profile)) : null }))
-    .sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1) || (b.score ?? 0) - (a.score ?? 0)), [incoming])
+    .sort((a, b) => ORDER[a.status] - ORDER[b.status] || (b.score ?? 0) - (a.score ?? 0)), [incoming])
 
-  const decide = async (a, status) => {
-    const conv = await api.setApplicationStatus(a.id, status)
-    await load()
-    const who = a.profile?.first_name || 'המבקש/ת'
-    if (status === 'accepted') flash(`הבקשה של ${who} אושרה. הצ'אט נפתח`); else flash(`הבקשה של ${who} נדחתה`, 'no')
-    if (status === 'accepted' && conv) openChat(conv.id)
-  }
+  const decide = (a, status) => decideApp(a, status, { openChat, reload: load })
   if (incoming === null) return <div className="skel tall" />
 
   return (
@@ -51,14 +45,19 @@ export default function Inbox() {
           <div key={a.id} className={'card appcard' + (focusPost && a.post_id === focusPost ? ' focus' : '')} ref={el => { if (el && focusPost && a.post_id === focusPost && !el.dataset.seen) { el.dataset.seen = '1'; el.scrollIntoView({ block: 'center' }) } }}>
             <div className="appcard-top">
               <Link to={`/post/${a.post_id}`} className="forpost">לדירה: {a.post?.title}</Link>
-              {a.status === 'pending' && a.score != null ? <span className={'match ' + (a.score >= 80 ? 'hi' : a.score >= 50 ? 'mid' : 'lo')}><i />{a.score}% התאמה</span>
-                : a.status !== 'pending' && <span className={'tag ' + a.status}>{STATUS[a.status]}</span>}
+              {(a.status === 'pending' || a.status === 'chatting') && a.score != null ? <span className={'match ' + (a.score >= 80 ? 'hi' : a.score >= 50 ? 'mid' : 'lo')}><i />{a.score}% התאמה</span>
+                : <span className={'tag ' + a.status}>{STATUS[a.status]}</span>}
             </div>
             <ProfileCard profile={a.profile} />
             {a.message && <blockquote className="msg">{a.message}</blockquote>}
             <div className="actions">
               {a.status === 'pending' && <>
-                <button className="btn primary" onClick={() => decide(a, 'accepted')}>אישור ופתיחת צ'אט</button>
+                <button className="btn primary" onClick={() => decide(a, 'chatting')}><Icon n="chat" size={16} /> שיחה</button>
+                <button className="btn ghost" onClick={() => decide(a, 'declined')}>דחייה</button>
+              </>}
+              {a.status === 'chatting' && <>
+                <button className="btn soft" onClick={() => openChat(a.conversation_id)}><Icon n="chat" size={16} /> לצ'אט</button>
+                <button className="btn primary" onClick={() => decide(a, 'accepted')}>אישור כניסה לדירה</button>
                 <button className="btn ghost" onClick={() => decide(a, 'declined')}>דחייה</button>
               </>}
               {a.status === 'accepted' && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}><Icon n="chat" size={16} /> לצ'אט</button>}
@@ -73,7 +72,7 @@ export default function Inbox() {
           <div key={a.id} className="row">
             <Link to={`/post/${a.post_id}`}>{a.title}</Link>
             <span className={'tag ' + a.status}>{STATUS[a.status]}</span>
-            {a.status === 'accepted' && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}>לצ'אט</button>}
+            {(a.status === 'accepted' || a.status === 'chatting') && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}>לצ'אט</button>}
           </div>
         ))}
       </div>}

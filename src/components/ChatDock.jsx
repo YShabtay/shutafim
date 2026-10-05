@@ -3,6 +3,7 @@ import { api } from '../api'
 import Avatar from './Avatar'
 import Icon from './Icon'
 import { markSeen } from '../seen'
+import { decide } from './decide'
 
 const Ctx = createContext({ openChat: () => {}, isOpen: () => false })
 export const useChatDock = () => useContext(Ctx)
@@ -34,8 +35,13 @@ function ChatWindow({ cid, min, onClose, onToggle }) {
     api.getConversation(cid).then(setConv)
     api.listMessages(cid).then(setMsgs)
     api.markConversationRead(cid)
-    return api.subscribe(cid, m => { setMsgs(m); api.markConversationRead(cid) })
+    return api.subscribe(cid, m => { setMsgs(m); api.markConversationRead(cid); api.getConversation(cid).then(setConv) })
   }, [cid])
+  const act = async status => {
+    const other = conv.other
+    await decide({ id: conv.application.id, profile: other }, status, { reload: async () => setConv(await api.getConversation(cid)) })
+    setMsgs(await api.listMessages(cid))
+  }
   useEffect(() => { if (!min) end.current?.scrollIntoView({ block: 'end' }) }, [msgs, min])
   useEffect(() => { // שיחה פתוחה ולא ממוזערת: ההודעות נקראו
     const last = msgs[msgs.length - 1]
@@ -60,7 +66,15 @@ function ChatWindow({ cid, min, onClose, onToggle }) {
       {!min && <>
         <div className="cwin-msgs">
           {conv === null && <p className="meta">השיחה לא נמצאה.</p>}
-          {conv && <div className="sysmsg"><Icon n="shield" size={14} /> הבקשה לדירה "{conv.title}" אושרה</div>}
+          {conv && (() => { const st = conv.application?.status
+            return st === 'accepted' ? <div className="sysmsg ok"><Icon n="shield" size={14} /> אושר/ה כשותף/ה לדירה "{conv.title}"</div>
+              : st === 'declined' ? <div className="sysmsg no">הבקשה נדחתה</div>
+              : <div className="sysmsg info">שלב היכרות לגבי "{conv.title}". ההחלטה הסופית עוד לא התקבלה</div> })()}
+          {conv?.role === 'owner' && conv.application?.status === 'chatting' && (
+            <div className="decidebar">
+              <button className="btn primary" onClick={() => act('accepted')}>אישור כניסה לדירה</button>
+              <button className="btn ghost" onClick={() => act('declined')}>דחייה</button>
+            </div>)}
                     {msgs.map(m => <div key={m.id} className={'bubble ' + (m.sender_id === me?.id ? 'me' : 'them')}>{m.body}</div>)}
           <div ref={end} />
         </div>

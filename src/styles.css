@@ -347,3 +347,11 @@ input[type=date]:disabled{opacity:.45}
 .flash.no{background:var(--ink);color:var(--bg)}
 @keyframes flashin{from{opacity:0;transform:translate(-50%,12px)}}
 .sysmsg{align-self:center;display:inline-flex;align-items:center;gap:6px;background:#e5f6ec;color:#16a34a;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:99px;text-align:center}
+
+/* chat-before-approval */
+.sysmsg.info{background:var(--tint);color:var(--brand)}
+.sysmsg.no{background:#fde8e8;color:#dc2626}
+.decidebar{display:flex;gap:8px;justify-content:center;margin:2px 0 6px}
+.decidebar .btn{padding:7px 14px;font-size:13px}
+.reqrow.talking{background:var(--soft)}
+.tag.chatting{background:#e6efff;color:#2f6bff}

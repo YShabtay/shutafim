@@ -8,7 +8,8 @@ import { markSeen } from '../seen'
 export const notifText = n => {
   const who = n.actor_name || 'מישהו'
   if (n.kind === 'application') return <><b>{who}</b> הגיש/ה בקשה לדירה "{n.post_title}"</>
-  if (n.kind === 'accepted') return <>הבקשה שלך לדירה "{n.post_title}" <b>אושרה</b>. אפשר לפתוח צ'אט</>
+  if (n.kind === 'chatting') return <><b>{who}</b> פתח/ה איתך שיחה לגבי הדירה "{n.post_title}"</>
+  if (n.kind === 'accepted') return <>אושרת כשותף/ה לדירה "{n.post_title}"!</>
   if (n.kind === 'declined') return <>הבקשה שלך לדירה "{n.post_title}" לא אושרה הפעם</>
   return <>הודעה חדשה מ-<b>{who}</b></>
 }
@@ -17,13 +18,14 @@ export const ago = iso => {
   return m < 1 ? 'עכשיו' : m < 60 ? `לפני ${m} דק׳` : m < 1440 ? `לפני ${Math.round(m / 60)} שע׳` : `לפני ${Math.round(m / 1440)} ימים`
 }
 export function NotifIcon({ kind }) {
-  return <span className={'bellico ' + kind}><Icon n={kind === 'message' ? 'chat' : kind === 'declined' ? 'x' : kind === 'accepted' ? 'shield' : 'users'} size={16} /></span>
+  return <span className={'bellico ' + kind}><Icon n={kind === 'message' || kind === 'chatting' ? 'chat' : kind === 'declined' ? 'x' : kind === 'accepted' ? 'shield' : 'users'} size={16} /></span>
 }
 
 // מצב ההתראות במקום אחד: משמש גם את הפעמון (בקשות) וגם את אייקון ההודעות
 export function useNotifications(enabled) {
   const [list, setList] = useState([])
-  const [requests, setRequests] = useState([]) // בקשות שממתינות לאישור שלי, מכל הדירות
+  const [requests, setRequests] = useState([]) // בקשות חדשות שממתינות לי, מכל הדירות
+  const [inTalks, setInTalks] = useState([])   // בקשות שאני בשיחה איתן ועוד לא החלטתי
   const [toast, setToast] = useState(null)
   const seen = useRef(null)
 
@@ -31,7 +33,7 @@ export function useNotifications(enabled) {
     let l
     try { l = (await api.listNotifications()).filter(n => n.kind !== 'message') } catch { return } // הודעות מחושבות בנפרד, מהשיחות עצמן
     setList(l)
-    try { setRequests((await api.listAllIncoming()).filter(a => a.status === 'pending')) } catch {}
+    try { const inc = await api.listAllIncoming(); setRequests(inc.filter(a => a.status === 'pending')); setInTalks(inc.filter(a => a.status === 'chatting')) } catch {}
     const keys = l.filter(n => !n.read).map(n => n.id + '|' + n.created_at)
     if (seen.current === null) { seen.current = new Set(keys); return }
     const fresh = l.find(n => !n.read && !seen.current.has(n.id + '|' + n.created_at))
@@ -39,10 +41,10 @@ export function useNotifications(enabled) {
     if (fresh) { setToast(fresh); setTimeout(() => setToast(t => (t === fresh ? null : t)), 7000) }
   }
   useEffect(() => {
-    if (!enabled) { setList([]); setRequests([]); seen.current = null; return }
+    if (!enabled) { setList([]); setRequests([]); setInTalks([]); seen.current = null; return }
     load(); return api.subscribeNotifications(load)
   }, [enabled])
-  return { list, requests, reload: load, toast, setToast }
+  return { list, requests, inTalks, reload: load, toast, setToast }
 }
 
 // פותח את מה שההתראה מצביעה עליו
@@ -53,7 +55,7 @@ export function useOpenNotification(reload) {
     await api.markNotificationRead(n.id); reload()
     if (n.kind === 'message') openChat(n.conversation_id)
     else if (n.kind === 'application') nav(`/inbox?tab=incoming&post=${n.post_id}`)
-    else if (n.kind === 'accepted') { const a = await api.getMyApplication(n.post_id); a?.conversation_id ? openChat(a.conversation_id) : nav('/inbox?tab=sent') }
+    else if (n.kind === 'accepted' || n.kind === 'chatting') { const a = await api.getMyApplication(n.post_id); a?.conversation_id ? openChat(a.conversation_id) : nav('/inbox?tab=sent') }
     else nav('/inbox?tab=sent')
   }
 }
