@@ -149,7 +149,13 @@ export const api = {
   },
 
   // ---- צ'אט (דמו: הצד השני עונה אוטומטית) ----
-  async listConversations() { return read(CK).filter(c => [c.owner_id, c.seeker_id].includes(USER.id)).map(withTitle) },
+  async listConversations() {
+    const msgs = read(MK)
+    return read(CK).filter(c => [c.owner_id, c.seeker_id].includes(USER.id)).map(c => {
+      const mine = msgs.filter(m => m.conversation_id === c.id)
+      return { ...withTitle(c), other: profileOf(c.owner_id === USER.id ? c.seeker_id : c.owner_id), last: mine[mine.length - 1] || null }
+    }).sort((a, b) => (b.last?.created_at || b.created_at).localeCompare(a.last?.created_at || a.created_at))
+  },
   async getConversation(id) {
     const c = read(CK).find(x => x.id === id); if (!c) return null
     return { ...withTitle(c), other: profileOf(c.owner_id === USER.id ? c.seeker_id : c.owner_id) }

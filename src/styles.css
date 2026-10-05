@@ -318,3 +318,10 @@ input[type=date]:disabled{opacity:.45}
 .tabs2 .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-inline-start:6px;border-radius:99px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;font-style:normal}
 .forpost{font-size:13px;font-weight:600;color:var(--mute)}
 .inbox .empty{line-height:1.8}
+
+/* messages dropdown (messenger-style) */
+.convitem{align-items:center}
+.convitem .belltext b{font-size:14.5px}
+.convitem .preview{color:var(--mute);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
+.convitem.unread .preview{color:var(--ink);font-weight:600}
+.appcard.focus{outline:2px solid var(--brand);outline-offset:2px}

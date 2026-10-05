@@ -19,6 +19,7 @@ export default function Inbox() {
     .then(([i, s, c]) => { setIncoming(i); setSent(s); setConvs(c) })
   useEffect(() => { load(); const t = setInterval(load, 3000); return () => clearInterval(t) }, [])
 
+  const focusPost = q.get('post')
   const pending = (incoming || []).filter(a => a.status === 'pending').length
   const tab = q.get('tab') || (pending || !(sent.length || convs.length) ? 'incoming' : sent.length ? 'sent' : 'chats')
   const list = useMemo(() => (incoming || [])
@@ -44,7 +45,7 @@ export default function Inbox() {
       {tab === 'incoming' && <>
         {list.length === 0 && <p className="empty">עדיין לא הגיעו בקשות. כשמישהו יגיש בקשה לאחת הדירות שלך, הוא יופיע כאן עם הפרופיל שלו. <br /><Link to="/new">פרסמו דירה</Link></p>}
         {list.map(a => (
-          <div key={a.id} className="card appcard">
+          <div key={a.id} className={'card appcard' + (focusPost && a.post_id === focusPost ? ' focus' : '')} ref={el => { if (el && focusPost && a.post_id === focusPost && !el.dataset.seen) { el.dataset.seen = '1'; el.scrollIntoView({ block: 'center' }) } }}>
             <div className="appcard-top">
               <Link to={`/post/${a.post_id}`} className="forpost">לדירה: {a.post?.title}</Link>
               {a.status === 'pending' && a.score != null ? <span className={'match ' + (a.score >= 80 ? 'hi' : a.score >= 50 ? 'mid' : 'lo')}><i />{a.score}% התאמה</span>

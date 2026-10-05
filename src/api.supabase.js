@@ -136,8 +136,14 @@ export const api = {
   // ---- צ'אט ----
   async listConversations() {
     const u = await this.getUser()
-    const data = ok(await sb.from('conversations').select('*, posts(title)').order('created_at', { ascending: false })) || []
-    return data.map(c => ({ ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker' }))
+    const data = ok(await sb.from('conversations').select('*, posts(title)')) || []
+    const ids = data.map(c => c.id)
+    const profs = await profilesByIds(data.map(c => (c.owner_id === u.id ? c.seeker_id : c.owner_id)))
+    const msgs = ids.length ? ok(await sb.from('messages').select('conversation_id, body, sender_id, created_at').in('conversation_id', ids).order('created_at', { ascending: false }).limit(300)) || [] : []
+    return data.map(c => ({
+      ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker',
+      other: profs[c.owner_id === u.id ? c.seeker_id : c.owner_id] || null, last: msgs.find(m => m.conversation_id === c.id) || null,
+    })).sort((a, b) => (b.last?.created_at || b.created_at).localeCompare(a.last?.created_at || a.created_at))
   },
   async getConversation(id) {
     const u = await this.getUser()
