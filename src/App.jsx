@@ -18,6 +18,7 @@ import { isComplete } from './match'
 import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
 import Legal from './pages/Legal'
+import Debug from './pages/Debug'
 import Logo from './components/Logo'
 import Icon from './components/Icon'
 
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat user={user} /> : <Login />} />
           <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Login />} />
           <Route path="/reset" element={user ? <ResetPassword /> : <Login />} />
+          <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Login />} />
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Login />} />
           <Route path="/post/:id/requests" element={user === undefined ? null : user ? <Requests /> : <Login />} />

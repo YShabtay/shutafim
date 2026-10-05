@@ -157,6 +157,10 @@ export const api = {
     const u = await this.getUser()
     ok(await sb.from('messages').insert({ conversation_id: cid, sender_id: u.id, body }))
   },
+  debugRealtime(onStatus, onEvent) {
+    const ch = sb.channel('dbg-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, onEvent).subscribe(onStatus)
+    return () => sb.removeChannel(ch)
+  },
   subscribeAllMessages(cb) {
     const ch = sb.channel('allmsgs-' + Math.random().toString(36).slice(2)).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, cb).subscribe()
     const t = setInterval(cb, 15000) // גיבוי למקרה שהחיבור בזמן אמת נפל
