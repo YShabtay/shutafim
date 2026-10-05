@@ -1,7 +1,7 @@
 // מצב דמו: הכול נשמר ב-localStorage. אנשים אחרים הם דמויות לדוגמה.
 import { compressImage, blobToDataUrl } from './image'
 
-const KEY = 'shutafim_posts_v3', CK = 'shutafim_convs', MK = 'shutafim_msgs', AK = 'shutafim_apps', PK = 'shutafim_profile'
+const KEY = 'shutafim_posts_v3', NK = 'shutafim_notifs', CK = 'shutafim_convs', MK = 'shutafim_msgs', AK = 'shutafim_apps', PK = 'shutafim_profile'
 const USER = { id: 'demo', email: 'demo@local' }
 const iso = (daysAgo = 0) => new Date(Date.now() - 86400000 * daysAgo).toISOString()
 
@@ -46,7 +46,15 @@ const save = p => write(KEY, p)
 const myProfile = () => { try { return JSON.parse(localStorage.getItem(PK)) } catch { return null } }
 const profileOf = uid => (uid === USER.id ? myProfile() : PEOPLE[uid] || null)
 
+function addNotif(n) { write(NK, [{ id: crypto.randomUUID(), read: false, created_at: new Date().toISOString(), ...n }, ...read(NK)]) }
+function messageNotif(conversation_id, actor_name) {
+  const all = read(NK); const ex = all.find(x => x.kind === 'message' && x.conversation_id === conversation_id && !x.read)
+  if (ex) write(NK, all.map(x => (x === ex ? { ...x, created_at: new Date().toISOString(), actor_name } : x)))
+  else addNotif({ kind: 'message', conversation_id, actor_name })
+}
+
 function addMsg(conversation_id, sender_id, body) {
+  if (sender_id !== USER.id) messageNotif(conversation_id, PEOPLE[sender_id]?.first_name || '')
   write(MK, [...read(MK), { id: crypto.randomUUID(), conversation_id, sender_id, body, created_at: new Date().toISOString() }])
 }
 function openConversation(post_id, owner_id, seeker_id, firstFrom, firstText) {
@@ -92,6 +100,7 @@ export const api = {
     write(AK, [...read(AK),
       { id: crypto.randomUUID(), post_id: post.id, owner_id: USER.id, applicant_id: 'u_dana', message: 'היי! ראיתי את הדירה ונשמע לי מושלם. אני שקטה ומסודרת, אשמח להכיר.', status: 'pending', created_at: iso(0) },
       { id: crypto.randomUUID(), post_id: post.id, owner_id: USER.id, applicant_id: 'u_amit', message: 'שלום, סטודנט לתואר שני, מחפש דירה רגועה ליד האוניברסיטה.', status: 'pending', created_at: iso(0) }])
+    for (const id of ['u_dana', 'u_amit']) addNotif({ kind: 'application', post_id: post.id, post_title: post.title, actor_name: PEOPLE[id].first_name })
     return post
   },
   async setStatus(id, status) { save(load().map(p => (p.id === id ? { ...p, status } : p))) },
@@ -106,6 +115,7 @@ export const api = {
     // דמו: בעל הדירה מאשר אחרי כמה שניות כדי שתוכלו לראות את הזרימה
     setTimeout(() => {
       write(AK, read(AK).map(a => (a.id === app.id ? { ...a, status: 'accepted' } : a)))
+      addNotif({ kind: 'accepted', post_id: postId, post_title: post.title, actor_name: PEOPLE[post.owner_id]?.first_name || '' })
       openConversation(postId, post.owner_id, USER.id, post.owner_id, 'היי! אישרתי את הבקשה שלך. נשמח להכיר, מתי נוח לך לבוא לראות את הדירה?')
     }, 4000)
     return app
@@ -147,4 +157,11 @@ export const api = {
     setTimeout(() => addMsg(cid, other, 'תודה על ההודעה! (תשובה אוטומטית של מצב הדמו)'), 1200)
   },
   subscribe(cid, cb) { const t = setInterval(() => this.listMessages(cid).then(cb), 1000); return () => clearInterval(t) },
+
+  // ---- התראות ----
+  async listNotifications() { return read(NK).slice(0, 30) },
+  async markNotificationRead(id) { write(NK, read(NK).map(n => (n.id === id ? { ...n, read: true } : n))) },
+  async markAllNotificationsRead() { write(NK, read(NK).map(n => ({ ...n, read: true }))) },
+  async markConversationRead(cid) { write(NK, read(NK).map(n => (n.kind === 'message' && n.conversation_id === cid ? { ...n, read: true } : n))) },
+  subscribeNotifications(cb) { const t = setInterval(cb, 1500); return () => clearInterval(t) },
 }

@@ -12,6 +12,7 @@ export default function Chat({ user }) {
   useEffect(() => {
     api.getConversation(id).then(setConv)
     api.listMessages(id).then(setMsgs)
+    api.markConversationRead(id)
     return api.subscribe(id, setMsgs)
   }, [id])
   useEffect(() => { end.current?.scrollIntoView({ block: 'end' }) }, [msgs])

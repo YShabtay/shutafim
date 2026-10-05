@@ -5,12 +5,14 @@ import { fmtDate, prefChips } from '../labels'
 import Icon from '../components/Icon'
 import Placeholder from '../components/Placeholder'
 import ProfileCard from '../components/ProfileCard'
+import { useChatDock } from '../components/ChatDock'
 import { isComplete } from '../match'
 
 const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה של בעל הדירה.', declined: 'הבקשה לא אושרה הפעם. אפשר לחפש דירות נוספות.', withdrawn: 'הבקשה בוטלה.' }
 
 export default function PostPage({ user, profile }) {
   const { id } = useParams()
+  const { openChat } = useChatDock()
   const [p, setP] = useState(undefined)
   const [host, setHost] = useState(null)
   const [app, setApp] = useState(undefined)
@@ -46,7 +48,7 @@ export default function PostPage({ user, profile }) {
     if (app === undefined) return <div className="skel" style={{ height: 120 }} />
     if (app?.status === 'accepted') return <>
       <p className="ok"><Icon n="shield" size={16} /> הבקשה אושרה!</p>
-      {app.conversation_id && <Link className="btn primary big" to={`/chat/${app.conversation_id}`}><Icon n="chat" size={18} /> לצ'אט עם בעל הדירה</Link>}
+      {app.conversation_id && <button className="btn primary big" onClick={() => openChat(app.conversation_id)}><Icon n="chat" size={18} /> לצ'אט עם בעל הדירה</button>}
       {social && <a className="btn soft big" href={social} target="_blank" rel="noreferrer noopener"><Icon n="link" size={17} /> פרופיל ברשת חברתית</a>}
     </>
     if (app) return <p className="meta">{STATUS_TXT[app.status]}</p>

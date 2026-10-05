@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { api } from '../api'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
+import { useChatDock } from '../components/ChatDock'
 import { matchScore, profileToFilter } from '../match'
 
 const STATUS = { pending: 'ממתינה', accepted: 'אושרה', declined: 'נדחתה', withdrawn: 'בוטלה' }
@@ -11,7 +12,7 @@ export default function Requests() {
   const { id } = useParams()
   const [post, setPost] = useState(undefined)
   const [apps, setApps] = useState(null)
-  const nav = useNavigate()
+  const { openChat } = useChatDock()
   const load = () => api.listIncoming(id).then(setApps)
   useEffect(() => { api.getPost(id).then(setPost); load() }, [id])
 
@@ -22,7 +23,7 @@ export default function Requests() {
   const decide = async (a, status) => {
     const conv = await api.setApplicationStatus(a.id, status)
     await load()
-    if (status === 'accepted' && conv) nav(`/chat/${conv.id}`)
+    if (status === 'accepted' && conv) openChat(conv.id)
   }
 
   if (post === undefined || apps === null) return <div className="skel tall" />
@@ -45,7 +46,7 @@ export default function Requests() {
               <button className="btn primary" onClick={() => decide(a, 'accepted')}>אישור ופתיחת צ'אט</button>
               <button className="btn ghost" onClick={() => decide(a, 'declined')}>דחייה</button>
             </>}
-            {a.status === 'accepted' && a.conversation_id && <Link className="btn soft" to={`/chat/${a.conversation_id}`}><Icon n="chat" size={16} /> לצ'אט</Link>}
+            {a.status === 'accepted' && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}><Icon n="chat" size={16} /> לצ'אט</button>}
           </div>
         </div>
       ))}

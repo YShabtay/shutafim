@@ -10,6 +10,7 @@ import Chat from './pages/Chat'
 import Profile from './pages/Profile'
 import Requests from './pages/Requests'
 import UserMenu from './components/UserMenu'
+import Bell from './components/Bell'
 import { isComplete } from './match'
 import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
@@ -48,7 +49,7 @@ export default function App() {
             <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
           </>}
           {user && <>
-            <Link to="/inbox" className="themebtn" aria-label="הודעות" title="הודעות"><Icon n="chat" size={18} /></Link>
+            <Bell />
             <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
             <UserMenu profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
           </>}

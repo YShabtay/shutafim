@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
+import { useChatDock } from '../components/ChatDock'
 
 const STATUS = { pending: 'ממתינה', accepted: 'אושרה', declined: 'נדחתה', withdrawn: 'בוטלה' }
 
 export default function Inbox() {
+  const { openChat } = useChatDock()
   const [convs, setConvs] = useState(null)
   const [apps, setApps] = useState([])
   useEffect(() => {
@@ -21,7 +23,7 @@ export default function Inbox() {
       {convs.length === 0 && <p className="meta">שיחה נפתחת אחרי שבקשה אושרה.</p>}
       {convs.map(c => (
         <div key={c.id} className="row">
-          <Link to={`/chat/${c.id}`}>{c.title}</Link>
+          <button className="linkbtn plain" onClick={() => openChat(c.id)}>{c.title}</button>
           <span className="tag">{c.role === 'owner' ? 'מתעניין/ת בדירה שלך' : 'בעל/ת הדירה'}</span>
         </div>
       ))}
@@ -31,7 +33,7 @@ export default function Inbox() {
         <div key={a.id} className="row">
           <Link to={`/post/${a.post_id}`}>{a.title}</Link>
           <span className={'tag ' + a.status}>{STATUS[a.status]}</span>
-          {a.status === 'accepted' && a.conversation_id && <Link className="btn soft" to={`/chat/${a.conversation_id}`}>לצ'אט</Link>}
+          {a.status === 'accepted' && a.conversation_id && <button className="btn soft" onClick={() => openChat(a.conversation_id)}>לצ'אט</button>}
         </div>
       ))}
     </div>
