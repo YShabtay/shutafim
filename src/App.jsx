@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, hasBackend, isGuest, enterGuest, exitGuest } from './api'
 import Feed from './pages/Feed'
 import PostPage from './pages/PostPage'
@@ -12,6 +12,8 @@ import Requests from './pages/Requests'
 import Avatar from './components/Avatar'
 import { isComplete } from './match'
 import Login from './components/Login'
+import ResetPassword from './pages/ResetPassword'
+import Legal from './pages/Legal'
 import Logo from './components/Logo'
 import Icon from './components/Icon'
 
@@ -27,6 +29,7 @@ export default function App() {
     try { localStorage.setItem('shutafim_theme', t) } catch {}
   }
   useEffect(() => api.onAuth(setUser), [])
+  useEffect(() => { const h = () => nav('/reset'); window.addEventListener('shutafim:recovery', h); return () => window.removeEventListener('shutafim:recovery', h) }, [])
   useEffect(() => {
     if (user === undefined) return
     if (!user) { setProfile(null); return }
@@ -37,6 +40,10 @@ export default function App() {
       <header className="top">
         <Link to="/" className="logo"><Logo />שותפים</Link>
         <nav>
+          {user === null && <>
+            <button className="btn ghost" onClick={() => nav('/login')}>התחברות</button>
+            <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
+          </>}
           <button className="themebtn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
             <Icon n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
           </button>
@@ -61,6 +68,9 @@ export default function App() {
           <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
           <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
           <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat user={user} /> : <Login />} />
+          <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Login />} />
+          <Route path="/reset" element={user ? <ResetPassword /> : <Login />} />
+          <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Login />} />
           <Route path="/post/:id/requests" element={user === undefined ? null : user ? <Requests /> : <Login />} />
           <Route path="/mine" element={user ? <MyPosts /> : <Login />} />
@@ -74,7 +84,7 @@ export default function App() {
             <p>האתר נועד ליצירת קשר בין שותפים בלבד, ואין בו אפשרות להעברת כספים. את התיאום הכספי (שכר דירה, פיקדון ועוד) הצדדים מסדירים ביניהם, מחוץ לאתר. בעל הדירה אינו צד באתר ואינו קשור אליו. אל תעבירו כסף לפני שראיתם את הדירה ופגשתם את השותפים.</p>
           </div>
         </div>
-        <div className="legal">חינמי לגמרי · הפרסום באחריות המפרסמים</div>
+        <div className="legal">חינמי לגמרי · הפרסום באחריות המפרסמים · <Link to="/legal/terms">תנאי שימוש</Link> · <Link to="/legal/privacy">מדיניות פרטיות</Link></div>
       </footer>
     </>
   )

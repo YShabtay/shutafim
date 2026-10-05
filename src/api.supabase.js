@@ -23,11 +23,30 @@ export const api = {
   async getUser() { return (await sb.auth.getUser()).data.user },
   onAuth(cb) {
     sb.auth.getSession().then(({ data }) => cb(data.session?.user ?? null))
-    const { data } = sb.auth.onAuthStateChange((_e, s) => cb(s?.user ?? null))
+    const { data } = sb.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') window.dispatchEvent(new Event('shutafim:recovery'))
+      cb(s?.user ?? null)
+    })
     return () => data.subscription.unsubscribe()
   },
-  async signIn(email) {
-    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin } })
+  async signUp(email, password) {
+    const { error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin } })
+    if (error) throw error
+  },
+  async signInPassword(email, password) {
+    const { error } = await sb.auth.signInWithPassword({ email, password })
+    if (error) throw error
+  },
+  async resendConfirmation(email) {
+    const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: location.origin } })
+    if (error) throw error
+  },
+  async resetPassword(email) {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin })
+    if (error) throw error
+  },
+  async updatePassword(password) {
+    const { error } = await sb.auth.updateUser({ password })
     if (error) throw error
   },
   async signOut() { await sb.auth.signOut() },

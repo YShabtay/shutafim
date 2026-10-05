@@ -9,5 +9,5 @@ const readGuest = () => { try { return localStorage.getItem(GUEST_KEY) === '1' }
 export const isGuest = hasBackend && readGuest()
 export const api = hasBackend && !isGuest ? remote : local
 
-export function enterGuest() { try { localStorage.setItem(GUEST_KEY, '1') } catch {} location.hash = '#/'; location.reload() }
-export function exitGuest() { try { localStorage.removeItem(GUEST_KEY) } catch {} location.hash = '#/'; location.reload() }
+export function enterGuest() { try { localStorage.setItem(GUEST_KEY, '1') } catch {} location.assign('/') }
+export function exitGuest() { try { localStorage.removeItem(GUEST_KEY) } catch {} location.assign('/') }
