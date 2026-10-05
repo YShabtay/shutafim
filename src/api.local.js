@@ -66,7 +66,7 @@ export const api = {
   mode: 'demo',
   async getUser() { return USER },
   onAuth(cb) { cb(USER); return () => {} },
-  async signUp() {}, async signInPassword() {}, async resendConfirmation() {}, async resetPassword() {}, async updatePassword() {}, async signOut() {},
+  async signUp() {}, async usernameAvailable() { return true }, async signInPassword() {}, async resendConfirmation() {}, async resetPassword() {}, async updatePassword() {}, async signOut() {},
 
   // ---- פרופילים ----
   async getProfile(uid) { return profileOf(uid) },

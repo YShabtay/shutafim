@@ -37,6 +37,7 @@ export default function Profile({ profile, onSaved }) {
       <h2>{profile ? 'הפרופיל שלי' : 'בואו נכיר'}</h2>
       <p className="meta">{next ? 'כדי להמשיך צריך פרופיל קצר. ' : ''}שותפים בוחרים אחד את השני, ופרופיל כנה עוזר למצוא התאמה אמיתית. אין בו טלפון או מייל.</p>
 
+      {profile?.username && <p className="meta">שם משתמש: <b dir="ltr">@{profile.username}</b> (נשמר לכניסה ולא ניתן לשינוי)</p>}
       <div className="photorow">
         <Avatar profile={preview} size={72} />
         <label className="btn soft">העלאת תמונה<input type="file" accept="image/*" hidden onChange={e => setFile(e.target.files[0] || null)} /></label>

@@ -29,11 +29,22 @@ export const api = {
     })
     return () => data.subscription.unsubscribe()
   },
-  async signUp(email, password) {
-    const { error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin } })
+  async signUp(email, password, meta) {
+    const { error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin, data: meta } })
     if (error) throw error
   },
-  async signInPassword(email, password) {
+  async usernameAvailable(name) {
+    const { data, error } = await sb.rpc('username_available', { p: name })
+    return error ? true : data !== false // אם הבדיקה לא זמינה, ממשיכים. השרת בודק שוב בהרשמה
+  },
+  // identifier: אימייל או שם משתמש
+  async signInPassword(identifier, password) {
+    let email = identifier
+    if (!identifier.includes('@')) {
+      const { data, error } = await sb.rpc('email_for_login', { p_username: identifier, p_password: password })
+      if (error || !data) throw new Error('Invalid login credentials')
+      email = data
+    }
     const { error } = await sb.auth.signInWithPassword({ email, password })
     if (error) throw error
   },
