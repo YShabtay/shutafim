@@ -29,6 +29,7 @@ export default function MyPosts() {
           <div key={p.id} className="row">
             <Link to={`/post/${p.id}`}>{p.title}</Link>
             <Link className={'btn soft' + (p.pending ? ' hot' : '')} to={`/post/${p.id}/requests`}>בקשות{p.pending ? ` (${p.pending})` : ''}</Link>
+            <Link className="btn ghost" to={`/post/${p.id}/edit`}>עריכה</Link>
             {tab === 'active'
               ? <button className="btn ghost" onClick={async () => { await api.setStatus(p.id, 'taken'); flash('הפוסט הועבר לארכיון'); load() }}>העברה לארכיון</button>
               : <button className="btn ghost" onClick={async () => { await api.setStatus(p.id, 'active'); flash('הפוסט פעיל שוב'); load() }}>הפעלה מחדש</button>}

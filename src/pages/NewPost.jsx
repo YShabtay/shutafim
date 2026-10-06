@@ -15,8 +15,25 @@ function socialUrl(type, handle) {
   return SOCIAL[type] + h.replace(/^@/, '')
 }
 
-export default function NewPost() {
-  const [f, setF] = useState(init)
+function parseSocial(u) {
+  if (!u) return { socialType: 'none', socialHandle: '' }
+  for (const [type, pre] of Object.entries(SOCIAL)) if (u.startsWith(pre)) return { socialType: type, socialHandle: '@' + u.slice(pre.length) }
+  return { socialType: 'instagram', socialHandle: u }
+}
+const fromPost = (p, social) => ({
+  ...init, title: p.title, city: p.city, neighborhood: p.neighborhood || '', rent: String(p.rent), available_from: p.available_from || '',
+  available_now: !!p.available_now, roommates_total: p.roommates_total || 2, description: p.description || '',
+  pref_gender: p.pref_gender, pref_occupation: p.pref_occupation, pref_smoking: p.pref_smoking, pref_pets: p.pref_pets, pref_kosher: !!p.pref_kosher,
+  pref_age_min: p.pref_age_min ? String(p.pref_age_min) : '', pref_age_max: p.pref_age_max ? String(p.pref_age_max) : '',
+  roommates: (p.roommates || []).map(m => ({ name: m.name || '', age: m.age ? String(m.age) : '', occupation: m.occupation || '' })),
+  ...parseSocial(social),
+})
+
+// יצירת פוסט חדש, או עריכה של פוסט קיים כשמעבירים post
+export default function NewPost({ post, social }) {
+  const editing = !!post
+  const [f, setF] = useState(() => (post ? fromPost(post, social) : init))
+  const [keep, setKeep] = useState(post?.photos || [])
   const [files, setFiles] = useState([])
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -30,18 +47,20 @@ export default function NewPost() {
     e.preventDefault(); setBusy(true); setErr('')
     try {
       const { socialType, socialHandle, ...rest } = f
-      const post = await api.createPost({
+      const payload = {
         ...rest, roommates: f.roommates.filter(m => m.name.trim()).map(m => ({ name: m.name.trim(), age: m.age ? +m.age : null, occupation: m.occupation.trim() })), social: socialUrl(socialType, socialHandle), rent: +f.rent, roommates_total: +f.roommates_total,
         pref_age_min: num(f.pref_age_min), pref_age_max: num(f.pref_age_max),
         available_from: f.available_from || null,
-      }, files.slice(0, 6))
-      nav(`/post/${post.id}`)
+      }
+      const room = Math.max(0, 6 - keep.length)
+      const saved = editing ? await api.updatePost(post.id, payload, files.slice(0, room), keep) : await api.createPost(payload, files.slice(0, 6))
+      nav(`/post/${saved.id}`)
     } catch (x) { setErr(x.message); setBusy(false) }
   }
 
   return (
     <form className="card narrow form" onSubmit={submit}>
-      <h2>פרסום דירה לשותפים</h2>
+      <h2>{editing ? 'עריכת הפוסט' : 'פרסום דירה לשותפים'}</h2>
       <label>כותרת<input required maxLength={80} placeholder="למשל: חדר בדירת 3 חדרים בפלורנטין" {...bind('title')} /></label>
       <div className="two">
         <label>עיר<input required {...bind('city')} /></label>
@@ -55,7 +74,9 @@ export default function NewPost() {
         <input type="date" disabled={f.available_now} {...bind('available_from')} />
         <label className="check inline"><input type="checkbox" checked={f.available_now} onChange={e => setF(s => ({ ...s, available_now: e.target.checked, available_from: e.target.checked ? '' : s.available_from }))} /> כניסה מיידית</label></div>
       <label>תיאור<textarea rows="4" {...bind('description')} /></label>
-      <label>תמונות (עד 6)<input type="file" accept="image/*" multiple onChange={async e => { setErr(''); try { setFiles(await Promise.all([...e.target.files].map(prepareImage))) } catch { setErr('לא הצלחנו לקרוא אחת התמונות. נסו תמונה אחרת.') } }} /></label>
+      {keep.length > 0 && <div className="keepphotos">{keep.map(u => (
+        <div key={u} className="keepph"><img src={u} alt="" /><button type="button" aria-label="הסר תמונה" onClick={() => setKeep(k => k.filter(x => x !== u))}>✕</button></div>))}</div>}
+      <label>{editing ? 'הוספת תמונות' : 'תמונות'} (עד 6 בסך הכול)<input type="file" accept="image/*" multiple onChange={async e => { setErr(''); try { setFiles(await Promise.all([...e.target.files].map(prepareImage))) } catch { setErr('לא הצלחנו לקרוא אחת התמונות. נסו תמונה אחרת.') } }} /></label>
 
       <h3>הדיירים בדירה</h3>
       <p className="meta">מי כבר גר שם? מי שמגיש בקשה רוצה להכיר גם אותם.</p>
@@ -90,7 +111,7 @@ export default function NewPost() {
         <label>שם משתמש או קישור<input disabled={f.socialType === 'none'} placeholder="@username" {...bind('socialHandle')} /></label>
       </div>
       {err && <p className="err">{err}</p>}
-      <button className="btn primary" disabled={busy}>{busy ? 'מפרסם…' : 'פרסום'}</button>
+      <button className="btn primary" disabled={busy}>{busy ? 'שומר…' : editing ? 'שמירת שינויים' : 'פרסום'}</button>
     </form>
   )
 }

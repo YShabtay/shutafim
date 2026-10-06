@@ -20,6 +20,7 @@ import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
 import Legal from './pages/Legal'
 import Debug from './pages/Debug'
+import EditPost from './pages/EditPost'
 import Logo from './components/Logo'
 import Icon from './components/Icon'
 
@@ -77,7 +78,7 @@ export default function App() {
       ) : null}
       <main>
         <Routes>
-          <Route path="/" element={<Feed profile={profile} pending={notifs.requests.length} />} />
+          <Route path="/" element={<Feed profile={profile} userId={user?.id} pending={notifs.requests.length} />} />
           <Route path="/post/:id" element={<PostPage user={user} profile={profile} />} />
           <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
           <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Login />} />
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Login />} />
+          <Route path="/post/:id/edit" element={user === undefined ? null : user ? <EditPost /> : <Login />} />
           <Route path="/post/:id/requests" element={user === undefined ? null : user ? <Requests /> : <Login />} />
           <Route path="/mine" element={user ? <MyPosts /> : <Login />} />
         </Routes>

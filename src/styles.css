@@ -355,3 +355,17 @@ input[type=date]:disabled{opacity:.45}
 .decidebar .btn{padding:7px 14px;font-size:13px}
 .reqrow.talking{background:var(--soft)}
 .tag.chatting{background:#e6efff;color:#2f6bff}
+
+/* post menu (three dots) + edit photos */
+.pmenu{position:relative;flex:none}
+.dots{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0;transition:background .15s}
+.dots:hover,.dots[aria-expanded=true]{background:var(--soft)}
+.dots svg{fill:currentColor;stroke:none}
+.pdrop{position:absolute;top:calc(100% + 6px);left:0;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(20,25,45,.22);padding:6px;z-index:40;display:flex;flex-direction:column;animation:fade .15s}
+.pdrop button{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:0;background:none;border-radius:10px;font:inherit;font-size:14px;color:var(--ink);cursor:pointer;text-align:right}
+.pdrop button:hover{background:var(--soft)}.pdrop button.danger{color:#dc2626}
+.titlerow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.titlerow>span{flex:1 1 240px}
+.keepphotos{display:flex;gap:10px;flex-wrap:wrap}
+.keepph{position:relative;width:92px;height:70px}.keepph img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.keepph button{position:absolute;top:-6px;left:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:11px;cursor:pointer;line-height:1}
+.line1 .pmenu .dots{width:28px;height:28px}

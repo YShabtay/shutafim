@@ -11,7 +11,7 @@ import { useFavs } from '../favs'
 
 const empty = { q: '', maxRent: '', gender: 'any', smoking: 'any', pets: 'any', occ: 'any', age: '' }
 
-export default function Feed({ profile, pending = 0 }) {
+export default function Feed({ profile, userId, pending = 0 }) {
   const [posts, setPosts] = useState(null)
   const [f, setF] = useState(empty)
   const [open, setOpen] = useState(false)
@@ -106,7 +106,7 @@ export default function Feed({ profile, pending = 0 }) {
               <Link to="/new" className="btn primary">פרסמו דירה</Link>
             </div>
           </div>) :
-        <div className="grid">{shown.map(({ p, score }, i) => <PostCard key={p.id} p={p} score={score} mine={!!profile && p.owner_id === profile.user_id} index={i} fav={favs.includes(p.id)} onFav={toggleFav} />)}</div>}
+        <div className="grid">{shown.map(({ p, score }, i) => <PostCard key={p.id} p={p} score={score} onChanged={() => api.listPosts().then(setPosts)} mine={!!userId && p.owner_id === userId} index={i} fav={favs.includes(p.id)} onFav={toggleFav} />)}</div>}
 
       <section className="how">
         <h2>איך זה עובד</h2>

@@ -103,6 +103,11 @@ export const api = {
     for (const id of ['u_dana', 'u_amit']) addNotif({ kind: 'application', post_id: post.id, post_title: post.title, actor_name: PEOPLE[id].first_name })
     return post
   },
+  async updatePost(id, { social, ...data }, files, keepPhotos) {
+    const added = await Promise.all(files.map(async f => blobToDataUrl(await compressImage(f, 900))))
+    save(load().map(p => (p.id === id ? { ...p, ...data, social: social || '', photos: [...keepPhotos, ...added] } : p)))
+    return load().find(p => p.id === id)
+  },
   async setStatus(id, status) { save(load().map(p => (p.id === id ? { ...p, status } : p))) },
   async deletePost(id) { save(load().filter(p => p.id !== id)) },
 

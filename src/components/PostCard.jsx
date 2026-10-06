@@ -3,8 +3,9 @@ import { entryText, prefChips } from '../labels'
 import { isNew } from '../match'
 import Icon from './Icon'
 import Placeholder from './Placeholder'
+import PostMenu from './PostMenu'
 
-export default function PostCard({ p, score, fav, onFav, mine = false, index = 0 }) {
+export default function PostCard({ p, score, fav, onFav, mine = false, onChanged, index = 0 }) {
   const photo = p.photos?.[0]
   const chips = prefChips(p).slice(0, 2).join(' · ')
   return (
@@ -20,6 +21,7 @@ export default function PostCard({ p, score, fav, onFav, mine = false, index = 0
       <div className="body">
         <div className="line1">
           <b>{p.city}{p.neighborhood && `, ${p.neighborhood}`}</b>
+          {mine && <PostMenu post={p} onChanged={onChanged} />}
           {!mine && score != null && <span className={'match ' + (score >= 80 ? 'hi' : score >= 50 ? 'mid' : 'lo')}><i />{score}% התאמה</span>}
         </div>
         <div className="sub">{p.title}</div>

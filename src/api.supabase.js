@@ -89,6 +89,14 @@ export const api = {
     if (social) ok(await sb.from('post_contacts').insert({ post_id: post.id, social }))
     return post
   },
+  async updatePost(id, { social, ...data }, files, keepPhotos) {
+    const u = await this.getUser()
+    const photos = [...keepPhotos]
+    for (const f of files) photos.push(await uploadPhoto(u.id, f, 1280))
+    const post = ok(await sb.from('posts').update({ ...data, photos }).eq('id', id).select().single())
+    ok(await sb.from('post_contacts').upsert({ post_id: id, social: social || null }))
+    return post
+  },
   async setStatus(id, status) { await sb.from('posts').update({ status }).eq('id', id) },
   async deletePost(id) { await sb.from('posts').delete().eq('id', id) },
 

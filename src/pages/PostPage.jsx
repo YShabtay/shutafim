@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 import { fmtDate, prefChips } from '../labels'
 import Icon from '../components/Icon'
 import Placeholder from '../components/Placeholder'
 import ProfileCard from '../components/ProfileCard'
 import { useChatDock } from '../components/ChatDock'
+import PostMenu from '../components/PostMenu'
 import { isComplete } from '../match'
 
 const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה של בעל הדירה.', declined: 'הבקשה לא אושרה הפעם. אפשר לחפש דירות נוספות.', withdrawn: 'הבקשה בוטלה.' }
@@ -13,6 +14,7 @@ const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה
 export default function PostPage({ user, profile }) {
   const { id } = useParams()
   const { openChat } = useChatDock()
+  const nav = useNavigate()
   const [p, setP] = useState(undefined)
   const [host, setHost] = useState(null)
   const [app, setApp] = useState(undefined)
@@ -42,7 +44,7 @@ export default function PostPage({ user, profile }) {
 
   const contactBox = () => {
     if (p.is_sample) return <><p className="meta"><b>זו דירה לדוגמה.</b> היא נוצרה כדי להמחיש איך האתר נראה, ואי אפשר להגיש לה בקשה.</p><Link className="btn primary big" to="/">חזרה לדירות</Link><Link className="btn soft big" to="/new">פרסמו דירה אמיתית</Link></>
-    if (mine) return <>{p.status !== 'active' && <p className="meta"><b>הפוסט בארכיון</b> והוא לא מופיע בחיפוש. אפשר להפעיל מחדש ב<Link to="/mine">הפוסטים שלי</Link>.</p>}<p className="meta">זה הפוסט שלך.</p><Link className="btn primary big" to={`/post/${id}/requests`}>צפייה בבקשות</Link></>
+    if (mine) return <>{p.status !== 'active' && <p className="meta"><b>הפוסט בארכיון</b> והוא לא מופיע בחיפוש. אפשר להפעיל מחדש ב<Link to="/mine">הפוסטים שלי</Link>.</p>}<p className="meta">זה הפוסט שלך.</p><Link className="btn primary big" to={`/post/${id}/requests`}>צפייה בבקשות</Link><Link className="btn soft big" to={`/post/${id}/edit`}><Icon n="pencil" size={16} /> עריכת הפוסט</Link></>
     if (p.status !== 'active' && app?.status !== 'accepted' && app?.status !== 'chatting') return <p className="meta"><b>הדירה כבר נתפסה.</b> אפשר לחפש דירות נוספות בעמוד הראשי.</p>
     if (!user) return <><p className="meta">התחברו כדי להגיש בקשה לדירה.</p><Link className="btn primary big" to="/new">התחברות</Link></>
     if (!isComplete(profile)) return <><p className="meta">כדי להגיש בקשה צריך פרופיל קצר, כך שבעל הדירה יכיר אתכם.</p><Link className="btn primary big" to={`/profile?next=/post/${id}`}>יצירת פרופיל</Link></>
@@ -79,7 +81,7 @@ export default function PostPage({ user, profile }) {
           </> : <Placeholder id={p.id} className="gallery" />}
 
           <div className="detail">
-            <h1>{p.title}{p.is_sample && <span className="sampletag inline">דוגמה</span>}</h1>
+            <h1 className="titlerow"><span>{p.title}</span>{mine && <PostMenu post={p} onChanged={() => api.getPost(id).then(setP)} afterDelete={() => nav('/mine')} />}{p.is_sample && <span className="sampletag inline">דוגמה</span>}</h1>
             <div className="meta big"><Icon n="pin" size={17} /> {p.city}{p.neighborhood && ` · ${p.neighborhood}`}</div>
             <div className="facts">
               <div><b>{p.roommates_total}</b><span>דיירים</span></div>
