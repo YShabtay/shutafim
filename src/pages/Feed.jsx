@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import PostCard from '../components/PostCard'
 import Icon from '../components/Icon'
-import HeroCarousel from '../components/HeroCarousel'
 import MoreCities from '../components/MoreCities'
 import NumberInput from '../components/NumberInput'
 import { hasProfile, matchScore, profileToFilter } from '../match'
@@ -64,15 +63,38 @@ export default function Feed({ profile, userId, pending = 0 }) {
           <b>לאישור</b>
         </Link>
       )}
-      <HeroCarousel>
-        <h1>מצאו את <span className="hl">השותפים הנכונים</span> לדירה</h1>
-        <p>דירות עם חדר פנוי, קריטריונים ברורים, וצ'אט ישיר עם הדיירים. חינם לגמרי.</p>
+      <section className="hero2 fullbleed">
+        <img className="himg light" src="/hero-light.jpg" alt="שלושה שותפים צוחקים יחד בסלון של דירה" fetchpriority="high" />
+        <img className="himg dark" src="/hero-dark.jpg" alt="" aria-hidden="true" />
+        <div className="hshade" />
+        <div className="hero2-in">
+          <span className="eyebrow">חינם לגמרי · בלי עמלות</span>
+          <h1>מצאו את <span className="hl">השותפים הנכונים</span> לדירה</h1>
+          <p>דירות עם חדר פנוי, קריטריונים ברורים, וצ'אט ישיר עם הדיירים.</p>
+        </div>
+        {posts && posts.length > 0 && (
+          <div className="hstats">
+            <div><b>{posts.length}</b><span>דירות פעילות</span></div>
+            <div><b>{cities.length}</b><span>ערים</span></div>
+            <div><b>₪0</b><span>עלות</span></div>
+          </div>
+        )}
+      </section>
+
+      <div className="searchfloat">
         <div className="searchbar">
           <label className="seg grow"><span>איפה</span><input placeholder="עיר או שכונה" value={f.q} onChange={e => set('q', e.target.value)} /></label>
           <div className="seg"><span>שכ״ד עד</span><NumberInput step={500} value={f.maxRent} onChange={v => set('maxRent', v)} placeholder="ללא הגבלה" suffix="₪" /></div>
           <button className="go" aria-label="חיפוש" onClick={() => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' })}><Icon n="search" size={20} /></button>
         </div>
-      </HeroCarousel>
+      </div>
+
+      <div className="featstrip">
+        <div><span className="fi"><Icon n="users" size={20} /></span><div><b>פרופילים אמיתיים</b><small>מכירים לפני שמחליטים</small></div></div>
+        <div><span className="fi"><Icon n="sliders" size={20} /></span><div><b>אחוז התאמה</b><small>לכל דירה, לפי הפרופיל שלכם</small></div></div>
+        <div><span className="fi"><Icon n="chat" size={20} /></span><div><b>צ'אט פרטי</b><small>בלי לחשוף טלפון</small></div></div>
+        <div><span className="fi"><Icon n="shield" size={20} /></span><div><b>אתם מחליטים</b><small>מי נכנס לדירה</small></div></div>
+      </div>
 
       <div className="pills">
         <button className={'pill' + (open ? ' on' : '')} onClick={() => setOpen(o => !o)}>
