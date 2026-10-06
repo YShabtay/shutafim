@@ -18,6 +18,7 @@ import MessagesMenu from './components/MessagesMenu'
 import { MessageToast, Toast, useNotifications } from './components/notifications'
 import { useConversations } from './components/useConversations'
 import { FlashHost } from './components/flash'
+import { ConfirmHost } from './components/confirm'
 import { isComplete } from './match'
 import Login from './components/Login'
 import ResetPassword from './pages/ResetPassword'
@@ -62,6 +63,7 @@ export default function App() {
         </div>
       </header>
       <FlashHost />
+      <ConfirmHost />
       {user && <Toast notifs={notifs} />}
       {user && <MessageToast msgs={msgs} userId={user.id} />}
       {isGuest ? (

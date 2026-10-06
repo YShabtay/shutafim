@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { flash } from '../components/flash'
+import { askConfirm } from '../components/confirm'
 
 // הפוסטים שלי: פעילים וארכיון. דירה עוברת לארכיון אוטומטית כשמאשרים שותף/ה, או ידנית.
 export default function MyPosts() {
@@ -33,7 +34,7 @@ export default function MyPosts() {
             {tab === 'active'
               ? <button className="btn ghost" onClick={async () => { await api.setStatus(p.id, 'taken'); flash('הפוסט הועבר לארכיון'); load() }}>העברה לארכיון</button>
               : <button className="btn ghost" onClick={async () => { await api.setStatus(p.id, 'active'); flash('הפוסט פעיל שוב'); load() }}>הפעלה מחדש</button>}
-            <button className="btn ghost" onClick={async () => { if (confirm('למחוק את הפוסט לצמיתות?')) { await api.deletePost(p.id); load() } }}>מחיקה</button>
+            <button className="btn ghost" onClick={async () => { if (await askConfirm({ title: 'למחוק את הפוסט?', text: 'הפוסט, הבקשות והשיחות שקשורים אליו יימחקו לצמיתות ואי אפשר לשחזר. אם הדירה פשוט נתפסה, עדיף להעביר אותה לארכיון.', confirmLabel: 'מחיקה', danger: true })) { await api.deletePost(p.id); load() } }}>מחיקה</button>
           </div>
         ))}
       </div>
