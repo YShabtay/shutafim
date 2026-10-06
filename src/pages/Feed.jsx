@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import PostCard from '../components/PostCard'
 import Icon from '../components/Icon'
@@ -8,6 +8,9 @@ import MoreCities from '../components/MoreCities'
 import NumberInput from '../components/NumberInput'
 import { hasProfile, matchScore, profileToFilter } from '../match'
 import { useFavs } from '../favs'
+import { postPoint } from '../geo'
+
+const MapView = lazy(() => import('../components/MapView')) // נטען רק כשפותחים את המפה
 
 const empty = { q: '', maxRent: '', gender: 'any', smoking: 'any', pets: 'any', occ: 'any', age: '' }
 
@@ -33,9 +36,12 @@ export default function Feed({ profile, userId, pending = 0 }) {
   const restCities = cities.slice(TOP)
   const pickedExtra = restCities.find(c => c.name === f.q) // עיר שנבחרה מהרשימה הארוכה מוצגת ככפתור פעיל
   const matched = hasProfile(f)
-  const filtered = f.q || f.maxRent || matched || onlyFavs
+  const [view, setView] = useState('list') // list | map
+  const [area, setArea] = useState(null)    // גבולות המפה שנבחרו לחיפוש
+  const nav = useNavigate()
+  const filtered = f.q || f.maxRent || matched || onlyFavs || area
 
-  const shown = useMemo(() => (posts || [])
+  const base = useMemo(() => (posts || [])
     .filter(p => {
       const q = f.q.trim()
       if (q && !`${p.city} ${p.neighborhood || ''} ${p.title}`.includes(q)) return false
@@ -45,6 +51,9 @@ export default function Feed({ profile, userId, pending = 0 }) {
     })
     .map(p => ({ p, score: matchScore(p, f) }))
     .sort((a, b) => (a.p.is_sample ? 1 : 0) - (b.p.is_sample ? 1 : 0) || (b.score ?? 0) - (a.score ?? 0)), [posts, f, onlyFavs, favs])
+  const inArea = p => { const pt = postPoint(p); return !!pt && pt[0] >= area.s && pt[0] <= area.n && pt[1] >= area.w && pt[1] <= area.e }
+  const shown = useMemo(() => (area ? base.filter(({ p }) => inArea(p)) : base), [base, area])
+  const mapItems = useMemo(() => base.map(({ p }) => ({ p, point: postPoint(p) })).filter(x => x.point), [base])
 
   return (
     <>
@@ -73,8 +82,9 @@ export default function Feed({ profile, userId, pending = 0 }) {
         <span className="sep" />
         {topCities.map(c => <button key={c.name} className={'pill' + (f.q === c.name ? ' on' : '')} onClick={() => set('q', f.q === c.name ? '' : c.name)}>{c.name}</button>)}
         {pickedExtra && <button className="pill on" onClick={() => set('q', '')}>{pickedExtra.name} <Icon n="x" size={13} /></button>}
+        {area && <button className="pill on" onClick={() => setArea(null)}>באזור המפה <Icon n="x" size={13} /></button>}
         {restCities.length > 0 && <MoreCities cities={restCities} selected={f.q} onPick={name => set('q', name)} />}
-        {filtered && <button className="pill clear" onClick={() => { setF(empty); setOnlyFavs(false) }}><Icon n="x" size={14} /> נקה</button>}
+        {filtered && <button className="pill clear" onClick={() => { setF(empty); setOnlyFavs(false); setArea(null) }}><Icon n="x" size={14} /> נקה</button>}
       </div>
 
       {open && (
@@ -93,8 +103,19 @@ export default function Feed({ profile, userId, pending = 0 }) {
       {err && <p className="err">{err}</p>}
       <div className="sectionhead" id="results">
         <h2>{matched ? 'מותאם בשבילך' : 'דירות עם חדר פנוי'}</h2>
-        {posts && <span className="meta">{shown.length} תוצאות</span>}
+        <div className="right">
+          {posts && <span className="meta">{shown.length} תוצאות</span>}
+          <div className="viewtoggle" role="tablist">
+            <button role="tab" aria-selected={view === 'list'} className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>רשימה</button>
+            <button role="tab" aria-selected={view === 'map'} className={view === 'map' ? 'on' : ''} onClick={() => setView('map')}>מפה</button>
+          </div>
+        </div>
       </div>
+      {view === 'map' && posts && (
+        <Suspense fallback={<div className="skel tall" />}>
+          <MapView items={mapItems} onOpen={id => nav(`/post/${id}`)} onSearchArea={setArea} />
+        </Suspense>
+      )}
       {posts === null ? <div className="grid">{[0, 1, 2, 3].map(i => <div key={i} className="skel" />)}</div> :
         shown.length === 0 ? (
           <div className="emptystate">
@@ -102,7 +123,7 @@ export default function Feed({ profile, userId, pending = 0 }) {
             <h3>{filtered ? 'לא מצאנו דירות שמתאימות' : 'עדיין אין דירות באתר'}</h3>
             <p>{filtered ? 'נסו להרחיב את החיפוש או לנקות את הסינון.' : 'היו הראשונים לפרסם חדר פנוי ולמצוא שותפים.'}</p>
             <div className="actions center">
-              {filtered && <button className="btn soft" onClick={() => { setF(empty); setOnlyFavs(false) }}>ניקוי סינון</button>}
+              {filtered && <button className="btn soft" onClick={() => { setF(empty); setOnlyFavs(false); setArea(null) }}>ניקוי סינון</button>}
               <Link to="/new" className="btn primary">פרסמו דירה</Link>
             </div>
           </div>) :

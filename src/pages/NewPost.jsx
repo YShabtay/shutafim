@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import NumberInput from '../components/NumberInput'
 import { prepareImage } from '../image'
+import { roundPoint } from '../geo'
 
-const init = { available_now: false, roommates: [], title: '', city: '', neighborhood: '', rent: '', available_from: '', roommates_total: 2, description: '', socialType: 'none', socialHandle: '',
+const LocationPicker = lazy(() => import('../components/LocationPicker'))
+
+const init = { lat: '', lng: '', available_now: false, roommates: [], title: '', city: '', neighborhood: '', rent: '', available_from: '', roommates_total: 2, description: '', socialType: 'none', socialHandle: '',
   pref_gender: 'any', pref_age_min: '', pref_age_max: '', pref_smoking: 'any', pref_pets: 'any', pref_kosher: false, pref_occupation: 'any' }
 
 const SOCIAL = { instagram: 'https://instagram.com/', facebook: 'https://facebook.com/', telegram: 'https://t.me/' }
@@ -23,6 +26,7 @@ function parseSocial(u) {
 const fromPost = (p, social) => ({
   ...init, title: p.title, city: p.city, neighborhood: p.neighborhood || '', rent: String(p.rent), available_from: p.available_from || '',
   available_now: !!p.available_now, roommates_total: p.roommates_total || 2, description: p.description || '',
+  lat: p.lat ?? '', lng: p.lng ?? '',
   pref_gender: p.pref_gender, pref_occupation: p.pref_occupation, pref_smoking: p.pref_smoking, pref_pets: p.pref_pets, pref_kosher: !!p.pref_kosher,
   pref_age_min: p.pref_age_min ? String(p.pref_age_min) : '', pref_age_max: p.pref_age_max ? String(p.pref_age_max) : '',
   roommates: (p.roommates || []).map(m => ({ name: m.name || '', age: m.age ? String(m.age) : '', occupation: m.occupation || '' })),
@@ -50,7 +54,7 @@ export default function NewPost({ post, social }) {
       const payload = {
         ...rest, roommates: f.roommates.filter(m => m.name.trim()).map(m => ({ name: m.name.trim(), age: m.age ? +m.age : null, occupation: m.occupation.trim() })), social: socialUrl(socialType, socialHandle), rent: +f.rent, roommates_total: +f.roommates_total,
         pref_age_min: num(f.pref_age_min), pref_age_max: num(f.pref_age_max),
-        available_from: f.available_from || null,
+        available_from: f.available_from || null, lat: roundPoint(f.lat), lng: roundPoint(f.lng),
       }
       const room = Math.max(0, 6 - keep.length)
       const saved = editing ? await api.updatePost(post.id, payload, files.slice(0, room), keep) : await api.createPost(payload, files.slice(0, 6))
@@ -73,6 +77,11 @@ export default function NewPost({ post, social }) {
       <div className="fw"><span>תאריך כניסה</span>
         <input type="date" disabled={f.available_now} {...bind('available_from')} />
         <label className="check inline"><input type="checkbox" checked={f.available_now} onChange={e => setF(s => ({ ...s, available_now: e.target.checked, available_from: e.target.checked ? '' : s.available_from }))} /> כניסה מיידית</label></div>
+      <h3>מיקום במפה</h3>
+      <p className="meta">המיקום יוצג באזור משוער (עיגול במפה) ולא ככתובת מדויקת, כדי לשמור על הפרטיות שלכם.</p>
+      <Suspense fallback={<div className="skel" style={{ height: 260 }} />}>
+        <LocationPicker city={f.city} neighborhood={f.neighborhood} lat={f.lat} lng={f.lng} onChange={(lat, lng) => setF(s => ({ ...s, lat, lng }))} />
+      </Suspense>
       <label>תיאור<textarea rows="4" {...bind('description')} /></label>
       {keep.length > 0 && <div className="keepphotos">{keep.map(u => (
         <div key={u} className="keepph"><img src={u} alt="" /><button type="button" aria-label="הסר תמונה" onClick={() => setKeep(k => k.filter(x => x !== u))}>✕</button></div>))}</div>}

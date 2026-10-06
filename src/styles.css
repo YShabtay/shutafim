@@ -369,3 +369,24 @@ input[type=date]:disabled{opacity:.45}
 .keepph{position:relative;width:92px;height:70px}.keepph img{width:100%;height:100%;object-fit:cover;border-radius:12px}
 .keepph button{position:absolute;top:-6px;left:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:11px;cursor:pointer;line-height:1}
 .line1 .pmenu .dots{width:28px;height:28px}
+
+/* map */
+.mapbox{position:relative;isolation:isolate;z-index:0;margin:4px 0 20px}
+.mapcanvas{height:min(560px,70vh);border-radius:20px;border:1px solid var(--line);overflow:hidden}
+.maparea{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:500;border:0;background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:9px 18px;border-radius:99px;box-shadow:0 6px 20px rgba(20,25,45,.25);cursor:pointer}
+.maparea:hover{background:var(--soft)}
+.pricepin{background:transparent;border:0}
+.pricepin span{display:inline-block;min-width:60px;text-align:center;background:var(--card);color:var(--ink);font-weight:800;font-size:13px;padding:5px 10px;border-radius:99px;box-shadow:0 3px 10px rgba(20,25,45,.3);border:1px solid var(--line);transition:transform .15s}
+.pricepin:hover span{transform:scale(1.12);background:var(--brand);color:#fff}
+.mappop{display:flex;flex-direction:column;gap:4px;min-width:170px;direction:rtl;font-family:inherit}
+.mappop span{color:#6b7280;font-size:13px}
+.mappop button{margin-top:6px;border:0;background:#2f6bff;color:#fff;border-radius:10px;padding:7px 12px;font:inherit;font-weight:700;cursor:pointer}
+.viewtoggle{display:inline-flex;background:var(--soft);border-radius:99px;padding:3px}
+.viewtoggle button{border:0;background:transparent;padding:6px 16px;border-radius:99px;font:inherit;font-size:14px;font-weight:600;color:var(--mute);cursor:pointer}
+.viewtoggle button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.sectionhead .right{display:flex;align-items:center;gap:14px}
+.locpick{display:flex;flex-direction:column;gap:8px}
+.locmap{height:260px;border-radius:16px;border:1px solid var(--line);overflow:hidden;isolation:isolate;z-index:0}
+.locbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.minimap{height:220px;border-radius:16px;border:1px solid var(--line);overflow:hidden;isolation:isolate;z-index:0}
+.leaflet-container{font-family:inherit}

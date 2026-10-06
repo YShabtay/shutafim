@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../api'
 import { fmtDate, prefChips } from '../labels'
@@ -6,10 +6,13 @@ import Icon from '../components/Icon'
 import Placeholder from '../components/Placeholder'
 import ProfileCard from '../components/ProfileCard'
 import { useChatDock } from '../components/ChatDock'
+import { postPoint } from '../geo'
 import PostMenu from '../components/PostMenu'
 import { isComplete } from '../match'
 
 const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה של בעל הדירה.', declined: 'הבקשה לא אושרה הפעם. אפשר לחפש דירות נוספות.', withdrawn: 'הבקשה בוטלה.' }
+
+const MiniMap = lazy(() => import('../components/MiniMap'))
 
 export default function PostPage({ user, profile }) {
   const { id } = useParams()
@@ -89,6 +92,11 @@ export default function PostPage({ user, profile }) {
               <div><b>₪{p.rent.toLocaleString()}</b><span>לחודש</span></div>
             </div>
             {p.description && <><h3>על הדירה</h3><p className="desc">{p.description}</p></>}
+            {postPoint(p) && <>
+              <h3>איפה זה</h3>
+              <Suspense fallback={<div className="skel" style={{ height: 220 }} />}><MiniMap point={postPoint(p)} /></Suspense>
+              <p className="meta small">מיקום משוער. הכתובת המדויקת נמסרת בשיחה עם בעל הדירה.</p>
+            </>}
             <h3>את מי מחפשים</h3>
             <div className="chips">{chips.length ? chips.map(c => <span key={c}>{c}</span>) : <span>פתוח לכולם</span>}</div>
 
