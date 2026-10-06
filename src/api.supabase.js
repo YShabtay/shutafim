@@ -133,7 +133,10 @@ export const api = {
       conv = ok(await sb.from('conversations').insert({ post_id: a.post_id, owner_id: a.owner_id, seeker_id: a.applicant_id }).select().single())
       await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'היי! ראיתי את הבקשה שלך ואשמח להכיר. בוא/י נדבר.' })
     }
-    if (status === 'accepted') await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'מזל טוב, אושרת כשותף/ה לדירה!' })
+    if (status === 'accepted') {
+      await sb.from('messages').insert({ conversation_id: conv.id, sender_id: a.owner_id, body: 'מזל טוב, אושרת כשותף/ה לדירה!' })
+      await sb.from('posts').update({ status: 'taken' }).eq('id', a.post_id) // הדירה עוברת לארכיון ונעלמת מהחיפוש
+    }
     return conv
   },
 

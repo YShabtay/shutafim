@@ -8,10 +8,10 @@ export const STATUS = { pending: 'ממתינה', chatting: 'בשיחה', accepte
 // פעולת בעל הדירה על בקשה: chatting (פותח שיחה, לא מאשר) | accepted (אישור סופי) | declined
 export async function decide(a, status, { openChat, reload } = {}) {
   const who = a.profile?.first_name || a.applicantName || 'המבקש/ת'
-  if (status === 'accepted' && !window.confirm(`לאשר את ${who} כשותף/ה לדירה? זו ההחלטה הסופית.`)) return null
+  if (status === 'accepted' && !window.confirm(`לאשר את ${who} כשותף/ה לדירה? זו ההחלטה הסופית, והפוסט יועבר לארכיון ויוסתר מהחיפוש.`)) return null
   const conv = await api.setApplicationStatus(a.id, status)
   if (status === 'chatting') flash(`נפתחה שיחה עם ${who}`)
-  else if (status === 'accepted') flash(`אישרת את ${who} כשותף/ה לדירה`)
+  else if (status === 'accepted') flash(`אישרת את ${who} כשותף/ה לדירה. הפוסט הועבר לארכיון`)
   else flash(`הבקשה של ${who} נדחתה`, 'no')
   await reload?.()
   if (status === 'chatting' && conv) openChat?.(conv.id)

@@ -152,7 +152,10 @@ export const api = {
     const isNew = !convFor(a.post_id, a.applicant_id)
     const conv = openConversation(a.post_id, a.owner_id, a.applicant_id, USER.id, 'היי! ראיתי את הבקשה שלך ואשמח להכיר. בוא/י נדבר.')
     if (isNew) setTimeout(() => addMsg(conv.id, a.applicant_id, 'תודה שפנית אליי! אשמח לתאם ביקור בדירה.'), 1500)
-    if (status === 'accepted') addMsg(conv.id, USER.id, 'מזל טוב, אושרת כשותף/ה לדירה!')
+    if (status === 'accepted') {
+      addMsg(conv.id, USER.id, 'מזל טוב, אושרת כשותף/ה לדירה!')
+      save(load().map(p => (p.id === a.post_id ? { ...p, status: 'taken' } : p))) // לארכיון
+    }
     return conv
   },
 

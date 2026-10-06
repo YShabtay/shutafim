@@ -42,7 +42,8 @@ export default function PostPage({ user, profile }) {
 
   const contactBox = () => {
     if (p.is_sample) return <><p className="meta"><b>זו דירה לדוגמה.</b> היא נוצרה כדי להמחיש איך האתר נראה, ואי אפשר להגיש לה בקשה.</p><Link className="btn primary big" to="/">חזרה לדירות</Link><Link className="btn soft big" to="/new">פרסמו דירה אמיתית</Link></>
-    if (mine) return <><p className="meta">זה הפוסט שלך.</p><Link className="btn primary big" to={`/post/${id}/requests`}>צפייה בבקשות</Link></>
+    if (mine) return <>{p.status !== 'active' && <p className="meta"><b>הפוסט בארכיון</b> והוא לא מופיע בחיפוש. אפשר להפעיל מחדש ב<Link to="/mine">הפוסטים שלי</Link>.</p>}<p className="meta">זה הפוסט שלך.</p><Link className="btn primary big" to={`/post/${id}/requests`}>צפייה בבקשות</Link></>
+    if (p.status !== 'active' && app?.status !== 'accepted' && app?.status !== 'chatting') return <p className="meta"><b>הדירה כבר נתפסה.</b> אפשר לחפש דירות נוספות בעמוד הראשי.</p>
     if (!user) return <><p className="meta">התחברו כדי להגיש בקשה לדירה.</p><Link className="btn primary big" to="/new">התחברות</Link></>
     if (!isComplete(profile)) return <><p className="meta">כדי להגיש בקשה צריך פרופיל קצר, כך שבעל הדירה יכיר אתכם.</p><Link className="btn primary big" to={`/profile?next=/post/${id}`}>יצירת פרופיל</Link></>
     if (app === undefined) return <div className="skel" style={{ height: 120 }} />
