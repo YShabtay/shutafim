@@ -22,7 +22,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet" />
       <script>
       try { const q = new URLSearchParams(location.search).get('accent'); if (q) localStorage.setItem('shutafim_accent', q); const a = localStorage.getItem('shutafim_accent'); if (a && a !== 'mono') document.documentElement.dataset.accent = a } catch {}
-      try { document.documentElement.dataset.theme = localStorage.getItem('shutafim_theme') || 'light' } catch { document.documentElement.dataset.theme = 'light' }
+      document.documentElement.dataset.theme = 'light'
+      try { localStorage.removeItem('shutafim_theme') } catch {}
     </script>
   </head>
   <body>

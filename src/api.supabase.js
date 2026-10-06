@@ -193,11 +193,11 @@ export const api = {
   async listNotifications() { return ok(await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(30)) || [] },
   async markNotificationRead(id) { await sb.from('notifications').update({ read: true }).eq('id', id) },
   async markAllNotificationsRead() {
-    const u = await this.getUser()
+    const u = await this.getUser(); if (!u) return
     await sb.from('notifications').update({ read: true }).eq('user_id', u.id).eq('read', false)
   },
   async markConversationRead(cid) {
-    const u = await this.getUser()
+    const u = await this.getUser(); if (!u) return
     await sb.from('notifications').update({ read: true }).eq('user_id', u.id).eq('kind', 'message').eq('conversation_id', cid).eq('read', false)
   },
   subscribeNotifications(cb) {

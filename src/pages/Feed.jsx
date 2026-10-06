@@ -65,7 +65,6 @@ export default function Feed({ profile, userId, pending = 0 }) {
       )}
       <section className="hero2 fullbleed">
         <img className="himg light" src="/hero-light.jpg" alt="שלושה שותפים צוחקים יחד בסלון של דירה" fetchpriority="high" />
-        <img className="himg dark" src="/hero-dark.jpg" alt="" aria-hidden="true" />
         <div className="hshade" />
         <div className="hero2-in">
           <span className="eyebrow">חינם לגמרי · בלי עמלות</span>
