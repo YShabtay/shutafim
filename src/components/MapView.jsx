@@ -6,8 +6,8 @@ import { addBaseMap } from '../mapTiles'
 const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--mapc').trim() || '#14182b'
 
 // מפת דירות: כל דירה כבועת מחיר עם עיגול אזור משוער. לחיצה פותחת כרטיס קטן.
-export default function MapView({ items, onOpen, onSearchArea }) {
-  const el = useRef(), map = useRef(), group = useRef(), fitted = useRef(false)
+export default function MapView({ items, onOpen, onSearchArea, query = '', fallback = null }) {
+  const el = useRef(), map = useRef(), group = useRef(), fitted = useRef(false), lastKey = useRef(null)
   const [tick, setTick] = useState(0) // מצב תצוגה השתנה: מציירים מחדש את העיגולים בצבע המתאים
   useEffect(() => {
     map.current = L.map(el.current, { zoomControl: true }).setView([31.9, 34.95], 8)
@@ -28,11 +28,17 @@ export default function MapView({ items, onOpen, onSearchArea }) {
       const b = document.createElement('button'); b.textContent = 'לפוסט'; b.onclick = () => onOpen(p.id)
       box.append(t, s, b); m.bindPopup(box)
     }
-    if (pts.length && !fitted.current) { map.current.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 13 }); fitted.current = true }
-  }, [items, tick])
+    // כשהחיפוש משתנה: מקרבים לדירות שנמצאו, ואם אין דירות מתמקדים בעיר עצמה
+    const key = query || ''
+    if (lastKey.current !== key) {
+      if (pts.length) { map.current.fitBounds(L.latLngBounds(pts), { padding: [50, 50], maxZoom: 14 }); lastKey.current = key; fitted.current = true }
+      else if (fallback) { map.current.setView(fallback, 12); lastKey.current = key }
+    } else if (!fitted.current && pts.length) { map.current.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 13 }); fitted.current = true }
+  }, [items, tick, query, fallback])
   return (
     <div className="mapbox">
       <div ref={el} className="mapcanvas" />
+      {items.length === 0 && query && <div className="mapempty">אין דירות ב"{query}" עדיין</div>}
       <button className="maparea" onClick={() => { const b = map.current.getBounds(); onSearchArea({ s: b.getSouth(), n: b.getNorth(), w: b.getWest(), e: b.getEast() }) }}>חיפוש באזור הזה</button>
     </div>
   )

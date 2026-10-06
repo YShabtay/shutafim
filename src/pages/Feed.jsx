@@ -7,7 +7,7 @@ import MoreCities from '../components/MoreCities'
 import NumberInput from '../components/NumberInput'
 import { hasProfile, matchScore, profileToFilter } from '../match'
 import { useFavs } from '../favs'
-import { postPoint } from '../geo'
+import { cityPoint, locate, postPoint } from '../geo'
 
 const MapView = lazy(() => import('../components/MapView')) // נטען רק כשפותחים את המפה
 
@@ -36,6 +36,18 @@ export default function Feed({ profile, userId, pending = 0 }) {
   const pickedExtra = restCities.find(c => c.name === f.q) // עיר שנבחרה מהרשימה הארוכה מוצגת ככפתור פעיל
   const matched = hasProfile(f)
   const [view, setView] = useState('list') // list | map
+  const [mapQ, setMapQ] = useState('')       // החיפוש אחרי השהיה קצרה, כדי שהמפה לא תקפוץ בכל אות
+  const [fallback, setFallback] = useState(null) // מרכז העיר שחיפשו, לשימוש כשאין בה דירות
+  useEffect(() => { const t = setTimeout(() => setMapQ(f.q.trim()), 500); return () => clearTimeout(t) }, [f.q])
+  useEffect(() => {
+    let stale = false
+    setFallback(null)
+    if (!mapQ) return
+    const c = cityPoint(mapQ)
+    if (c) { setFallback(c); return }
+    locate(mapQ, '').then(r => { if (!stale) setFallback(r) })
+    return () => { stale = true }
+  }, [mapQ])
   const [area, setArea] = useState(null)    // גבולות המפה שנבחרו לחיפוש
   const nav = useNavigate()
   const filtered = f.q || f.maxRent || matched || onlyFavs || area
@@ -134,7 +146,7 @@ export default function Feed({ profile, userId, pending = 0 }) {
       </div>
       {view === 'map' && posts && (
         <Suspense fallback={<div className="skel tall" />}>
-          <MapView items={mapItems} onOpen={id => nav(`/post/${id}`)} onSearchArea={setArea} />
+          <MapView items={mapItems} query={mapQ} fallback={fallback} onOpen={id => nav(`/post/${id}`)} onSearchArea={setArea} />
         </Suspense>
       )}
       {posts === null ? <div className="grid">{[0, 1, 2, 3].map(i => <div key={i} className="skel" />)}</div> :
