@@ -422,7 +422,7 @@ input[type=date]:disabled{opacity:.45}
 /* ===== redesign: full-bleed hero, floating search, feature strip ===== */
 body{overflow-x:clip}
 .fullbleed{width:100vw;margin-inline:calc(50% - 50vw)}
-:root[data-theme=dark]{--bg:#0b0d14;--card:#12151f;--soft:#171b27;--line:#242a3a;--tint:#1d2029;--shadow:0 2px 12px rgba(0,0,0,.5)}
+:root[data-theme=dark]{--bg:#171a23;--card:#1e222d;--soft:#272c3a;--line:#343b4d;--tint:#272c3a;--shadow:0 2px 12px rgba(0,0,0,.5)}
 .hero2{position:relative;height:clamp(400px,46vw,600px);overflow:hidden;isolation:isolate;margin-top:0;background:#1b2236}
 .himg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 62%;z-index:-2}
 .himg.dark{display:none}
@@ -458,8 +458,9 @@ body{overflow-x:clip}
 /* ===== accent palettes. Default = black & white. Try ?accent=blue | warm | green | mono ===== */
 :root[data-accent=blue]{--brand:#2f6bff;--brand-d:#1f55e0;--tint:#eaf0ff;--brand-rgb:47,107,255;--on-brand:#fff;--hl:rgba(47,107,255,.92);--mapc:#2f6bff}
 :root[data-accent=blue][data-theme=dark]{--brand:#2f6bff;--brand-d:#4a80ff;--tint:#16213a;--brand-rgb:47,107,255;--on-brand:#fff}
-:root[data-accent=warm]{--brand:#a06a22;--brand-d:#85561a;--tint:#f6ecdc;--brand-rgb:160,106,34;--on-brand:#fff;--hl:rgba(160,106,34,.92);--mapc:#a06a22;--bg:#fffdf9;--soft:#f7f3ec;--line:#ebe4d8}
-:root[data-accent=warm][data-theme=dark]{--brand:#d6b87a;--brand-d:#c5a35f;--tint:#2a2214;--brand-rgb:214,184,122;--on-brand:#16120a;--hl:rgba(214,184,122,.9);--bg:#0e0d0b;--card:#16140f;--soft:#1c1913;--line:#2c271d}
+:root[data-accent=warm]{--brand:#a06a22;--brand-d:#85561a;--tint:#f6ecdc;--brand-rgb:160,106,34;--on-brand:#fff;--hl:rgba(160,106,34,.92);--mapc:#a06a22}
+:root[data-accent=warm]:not([data-theme=dark]){--bg:#fffdf9;--soft:#f7f3ec;--line:#ebe4d8}
+:root[data-accent=warm][data-theme=dark]{--brand:#e6cc96;--brand-d:#d6b87a;--tint:#2d2b35;--brand-rgb:230,204,150;--on-brand:#16120a;--hl:rgba(230,204,150,.9)}
 :root[data-accent=green]{--brand:#0f8f6f;--brand-d:#0b7559;--tint:#e3f5ef;--brand-rgb:15,143,111;--on-brand:#fff;--hl:rgba(15,143,111,.92);--mapc:#0f8f6f}
 :root[data-accent=green][data-theme=dark]{--brand:#34c79a;--brand-d:#28b085;--tint:#12281f;--brand-rgb:52,199,154;--on-brand:#06150f;--hl:rgba(52,199,154,.9)}
 
@@ -495,4 +496,7 @@ body{overflow-x:clip}
 /* map tiles: softer, cleaner look; inverted for dark mode */
 .leaflet-tile-pane{filter:saturate(.55) contrast(.94) brightness(1.04)}
 :root[data-theme=dark] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) saturate(.45) brightness(.92) contrast(.88)}
-:root[data-theme=dark] .leaflet-container{background:#141821}
+:root[data-theme=dark] .leaflet-container{background:#1b1f2a}
+
+:root[data-theme=dark] .himg.dark{filter:saturate(.8) brightness(1.1) contrast(.96)}
+:root[data-theme=dark] .hshade{background:linear-gradient(180deg,rgba(18,24,44,.74) 0%,rgba(18,24,44,.4) 48%,rgba(18,24,44,.26) 72%,rgba(18,24,44,.62) 100%)}
