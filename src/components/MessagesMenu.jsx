@@ -18,7 +18,7 @@ export default function MessagesMenu({ msgs }) {
     document.addEventListener('mousedown', close); return () => document.removeEventListener('mousedown', close)
   }, [])
   return (
-    <div className="bell" ref={wrap}>
+    <div className="bell msgmenu" ref={wrap}>
       <button className="themebtn" aria-label={unreadConvs.size ? `${unreadConvs.size} שיחות עם הודעות חדשות` : 'הודעות'} aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <Icon n="chat" size={18} />
         {unreadConvs.size > 0 && <i className="bellbadge">{unreadConvs.size > 9 ? '9+' : unreadConvs.size}</i>}

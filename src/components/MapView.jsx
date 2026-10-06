@@ -1,17 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { addBaseMap } from '../mapTiles'
 
 const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--mapc').trim() || '#14182b'
 
 // מפת דירות: כל דירה כבועת מחיר עם עיגול אזור משוער. לחיצה פותחת כרטיס קטן.
 export default function MapView({ items, onOpen, onSearchArea }) {
   const el = useRef(), map = useRef(), group = useRef(), fitted = useRef(false)
+  const [tick, setTick] = useState(0) // מצב תצוגה השתנה: מציירים מחדש את העיגולים בצבע המתאים
   useEffect(() => {
     map.current = L.map(el.current, { zoomControl: true }).setView([31.9, 34.95], 8)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map.current)
+    const stopTheme = addBaseMap(map.current, () => setTick(t => t + 1))
     group.current = L.layerGroup().addTo(map.current)
-    return () => map.current.remove()
+    return () => { stopTheme(); map.current.remove() }
   }, [])
   useEffect(() => {
     group.current.clearLayers()
@@ -27,7 +29,7 @@ export default function MapView({ items, onOpen, onSearchArea }) {
       box.append(t, s, b); m.bindPopup(box)
     }
     if (pts.length && !fitted.current) { map.current.fitBounds(L.latLngBounds(pts), { padding: [40, 40], maxZoom: 13 }); fitted.current = true }
-  }, [items])
+  }, [items, tick])
   return (
     <div className="mapbox">
       <div ref={el} className="mapcanvas" />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { locate } from '../geo'
+import { addBaseMap, pinIcon } from '../mapTiles'
 
 // בחירת מיקום משוער בטופס הפרסום: מוצאים לפי עיר ושכונה, אפשר ללחוץ או לגרור כדי לתקן
 export default function LocationPicker({ city, neighborhood, lat, lng, onChange }) {
@@ -11,7 +12,7 @@ export default function LocationPicker({ city, neighborhood, lat, lng, onChange 
 
   const place = (ll, zoom) => {
     if (!marker.current) {
-      marker.current = L.marker(ll, { draggable: true }).addTo(map.current)
+      marker.current = L.marker(ll, { draggable: true, icon: pinIcon() }).addTo(map.current)
       marker.current.on('dragend', () => { touched.current = true; const p = marker.current.getLatLng(); cb.current(p.lat, p.lng) })
     } else marker.current.setLatLng(ll)
     if (zoom) map.current.setView(ll, zoom)
@@ -20,10 +21,10 @@ export default function LocationPicker({ city, neighborhood, lat, lng, onChange 
   useEffect(() => {
     const has = lat !== '' && lat != null
     map.current = L.map(el.current).setView(has ? [lat, lng] : [31.9, 34.95], has ? 15 : 7)
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map.current)
+    const stopTheme = addBaseMap(map.current)
     if (has) place([lat, lng])
     map.current.on('click', e => { touched.current = true; place(e.latlng) })
-    return () => map.current.remove()
+    return () => { stopTheme(); map.current.remove() }
   }, [])
   const find = async () => {
     setMsg('מחפש…')

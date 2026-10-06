@@ -46,7 +46,7 @@ export default function Bell({ notifs }) {
     </div>
   )
   return (
-    <div className="bell" ref={wrap}>
+    <div className="bell bellmenu" ref={wrap}>
       <button className="themebtn" aria-label={total ? `${total} התראות חדשות` : 'התראות'} aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <Icon n="bell" size={18} />
         {total > 0 && <i className="bellbadge">{total > 9 ? '9+' : total}</i>}

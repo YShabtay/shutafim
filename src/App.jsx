@@ -50,21 +50,24 @@ export default function App() {
     <>
       <header className="top">
         <Link to="/" className="logo"><Logo /><span className="logotxt">שותפים</span></Link>
-        <nav>
+        <div className="topactions">
           <button className="themebtn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
             <Icon n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
           </button>
-          {user === null && <>
-            <button className="btn ghost" onClick={() => nav('/login')}>התחברות</button>
-            <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
-          </>}
-          {user && <>
-            <MessagesMenu msgs={msgs} />
-            <Bell notifs={notifs} />
-            <button className="btn dark newpost" aria-label="פרסום דירה" onClick={() => nav('/new')}><Icon n="plus" size={16} /><span className="lbl">פרסום דירה</span></button>
-            <UserMenu pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
-          </>}
-        </nav>
+          <nav className={'mainnav ' + (user ? 'in' : 'out')}>
+            {user === null && <>
+              <button className="btn ghost" onClick={() => nav('/login')}>התחברות</button>
+              <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
+            </>}
+            {user && <>
+              <Link to="/" className="themebtn navhome" aria-label="דף הבית"><Icon n="home" size={20} /></Link>
+              <MessagesMenu msgs={msgs} />
+              <Bell notifs={notifs} />
+              <button className="btn dark newpost" aria-label="פרסום דירה" onClick={() => nav('/new')}><Icon n="plus" size={16} /><span className="lbl">פרסום דירה</span></button>
+              <UserMenu pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
+            </>}
+          </nav>
+        </div>
       </header>
       <FlashHost />
       {user && <Toast notifs={notifs} />}
