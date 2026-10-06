@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, Route, Routes, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, hasBackend, isGuest, enterGuest, exitGuest } from './api'
 import Feed from './pages/Feed'
 import PostPage from './pages/PostPage'
@@ -32,6 +32,8 @@ export default function App() {
   const [user, setUser] = useState(undefined)
   const [profile, setProfile] = useState(undefined)
   const nav = useNavigate()
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname]) // כל מעבר לדף חדש מתחיל מלמעלה
   const notifs = useNotifications(!!user)
   const msgs = useConversations(user?.id)
   const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length + msgs.unread.size

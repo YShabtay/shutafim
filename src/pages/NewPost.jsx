@@ -2,7 +2,8 @@ import { lazy, Suspense, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import NumberInput from '../components/NumberInput'
-import { prepareImage } from '../image'
+import PhotoPicker from '../components/PhotoPicker'
+import { flash } from '../components/flash'
 import { roundPoint } from '../geo'
 
 const LocationPicker = lazy(() => import('../components/LocationPicker'))
@@ -58,6 +59,7 @@ export default function NewPost({ post, social }) {
       }
       const room = Math.max(0, 6 - keep.length)
       const saved = editing ? await api.updatePost(post.id, payload, files.slice(0, room), keep) : await api.createPost(payload, files.slice(0, 6))
+      flash(editing ? 'השינויים נשמרו' : 'הפוסט פורסם! 🎉')
       nav(`/post/${saved.id}`)
     } catch (x) { setErr(x.message); setBusy(false) }
   }
@@ -83,9 +85,7 @@ export default function NewPost({ post, social }) {
         <LocationPicker city={f.city} neighborhood={f.neighborhood} lat={f.lat} lng={f.lng} onChange={(lat, lng) => setF(s => ({ ...s, lat, lng }))} />
       </Suspense>
       <label>תיאור<textarea rows="4" {...bind('description')} /></label>
-      {keep.length > 0 && <div className="keepphotos">{keep.map(u => (
-        <div key={u} className="keepph"><img src={u} alt="" /><button type="button" aria-label="הסר תמונה" onClick={() => setKeep(k => k.filter(x => x !== u))}>✕</button></div>))}</div>}
-      <label>{editing ? 'הוספת תמונות' : 'תמונות'} (עד 6 בסך הכול)<input type="file" accept="image/*" multiple onChange={async e => { setErr(''); try { setFiles(await Promise.all([...e.target.files].map(prepareImage))) } catch { setErr('לא הצלחנו לקרוא אחת התמונות. נסו תמונה אחרת.') } }} /></label>
+      <div className="fw"><span>תמונות</span><PhotoPicker keep={keep} onKeepChange={setKeep} files={files} onFilesChange={setFiles} onError={setErr} /></div>
 
       <h3>הדיירים בדירה</h3>
       <p className="meta">מי כבר גר שם? מי שמגיש בקשה רוצה להכיר גם אותם.</p>

@@ -515,3 +515,18 @@ body{overflow-x:clip}
 .mapsug li button:hover{background:var(--soft)}
 .leaflet-top.leaflet-left{top:0}
 @media(max-width:640px){.mapsearch{left:56px;right:10px;top:10px;height:44px}}
+
+/* photo picker */
+.photopicker{display:flex;flex-direction:column;gap:12px}
+.dropzone{display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 16px;border:2px dashed var(--line);border-radius:18px;background:var(--soft);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.dropzone:hover:not(:disabled){border-color:var(--brand);background:var(--card)}
+.dropzone.over{border-color:var(--brand);background:var(--tint);transform:scale(1.01)}
+.dropzone:disabled{opacity:.6;cursor:default}
+.dropzone b{font-size:15px}.dropzone small{color:var(--mute);font-size:12.5px}
+.dzico{width:52px;height:52px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--brand);margin-bottom:4px}
+.photogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.phth{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:var(--soft);border:1px solid var(--line)}
+.phth img{width:100%;height:100%;object-fit:cover;display:block}
+.phth button{position:absolute;top:6px;left:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(15,20,35,.72);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+.phth button:hover{background:#dc2626}
+.phmain{position:absolute;bottom:6px;right:6px;background:rgba(255,255,255,.94);color:#14182b;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
