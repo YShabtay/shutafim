@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#2f6bff'
+
 // מפת דירות: כל דירה כבועת מחיר עם עיגול אזור משוער. לחיצה פותחת כרטיס קטן.
 export default function MapView({ items, onOpen, onSearchArea }) {
   const el = useRef(), map = useRef(), group = useRef(), fitted = useRef(false)
@@ -16,7 +18,7 @@ export default function MapView({ items, onOpen, onSearchArea }) {
     const pts = []
     for (const { p, point } of items) {
       pts.push(point)
-      L.circle(point, { radius: 300, color: '#2f6bff', weight: 1, fillColor: '#2f6bff', fillOpacity: 0.12 }).addTo(group.current)
+      L.circle(point, { radius: 300, color: brand(), weight: 1, fillColor: brand(), fillOpacity: 0.12 }).addTo(group.current)
       const m = L.marker(point, { icon: L.divIcon({ className: 'pricepin', html: `<span>₪${p.rent.toLocaleString()}</span>`, iconSize: [64, 28], iconAnchor: [32, 14] }) }).addTo(group.current)
       const box = document.createElement('div'); box.className = 'mappop'
       const t = document.createElement('b'); t.textContent = p.title
