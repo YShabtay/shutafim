@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import Avatar from './Avatar'
 import Icon from './Icon'
@@ -11,10 +12,14 @@ export const useChatDock = () => useContext(Ctx)
 // חלונות צ'אט קטנים בפינה, כמו במסנג'ר: עד 3 שיחות פתוחות, אפשר למזער ולסגור
 export function ChatDockProvider({ children }) {
   const [wins, setWins] = useState([]) // { id, min }
-  const openChat = id => setWins(w => (w.some(x => x.id === id) ? w.map(x => (x.id === id ? { ...x, min: false } : x)) : [...w.slice(-2), { id, min: false }]))
+  const nav = useNavigate()
+  const loc = useLocation()
+  const isMobile = () => window.matchMedia('(max-width: 640px)').matches
+  // בנייד שיחה נפתחת כעמוד מלא ולא כחלון צף
+  const openChat = id => isMobile() ? nav(`/chat/${id}`) : setWins(w => (w.some(x => x.id === id) ? w.map(x => (x.id === id ? { ...x, min: false } : x)) : [...w.slice(-2), { id, min: false }]))
   const close = id => setWins(w => w.filter(x => x.id !== id))
   const toggle = id => setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
-  const isOpen = id => wins.some(x => x.id === id && !x.min)
+  const isOpen = id => wins.some(x => x.id === id && !x.min) || loc.pathname === `/chat/${id}`
   return (
     <Ctx.Provider value={{ openChat, isOpen }}>
       {children}
@@ -23,7 +28,7 @@ export function ChatDockProvider({ children }) {
   )
 }
 
-function ChatWindow({ cid, min, onClose, onToggle }) {
+export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
   const [me, setMe] = useState(null)
   const [conv, setConv] = useState(undefined)
   const [msgs, setMsgs] = useState([])
@@ -56,12 +61,13 @@ function ChatWindow({ cid, min, onClose, onToggle }) {
   }
   const name = conv?.other ? conv.other.first_name : conv?.title || '…'
   return (
-    <section className={'cwin' + (min ? ' min' : '')} aria-label={'צ\'אט עם ' + name}>
-      <header onClick={onToggle}>
+    <section className={'cwin' + (min ? ' min' : '') + (page ? ' page' : '')} aria-label={'צ\'אט עם ' + name}>
+      <header onClick={page ? undefined : onToggle}>
+        {page && <button aria-label="חזרה" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="arrow" size={16} /></button>}
         {conv?.other && <Avatar profile={conv.other} size={30} />}
         <div className="cwin-title"><b>{name}</b>{conv?.title && <small>{conv.title}</small>}</div>
-        <button aria-label={min ? 'הרחב' : 'מזער'} onClick={e => { e.stopPropagation(); onToggle() }}><Icon n="minus" size={16} /></button>
-        <button aria-label="סגור" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="x" size={16} /></button>
+        {!page && <button aria-label={min ? 'הרחב' : 'מזער'} onClick={e => { e.stopPropagation(); onToggle() }}><Icon n="minus" size={16} /></button>}
+        {!page && <button aria-label="סגור" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="x" size={16} /></button>}
       </header>
       {!min && <>
         <div className="cwin-msgs">

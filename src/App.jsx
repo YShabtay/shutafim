@@ -11,6 +11,9 @@ import Profile from './pages/Profile'
 import Requests from './pages/Requests'
 import UserMenu from './components/UserMenu'
 import Bell from './components/Bell'
+import BottomBar from './components/BottomBar'
+import Notifications from './pages/Notifications'
+import Account from './pages/Account'
 import MessagesMenu from './components/MessagesMenu'
 import { MessageToast, Toast, useNotifications } from './components/notifications'
 import { useConversations } from './components/useConversations'
@@ -74,7 +77,9 @@ export default function App() {
           <Route path="/post/:id" element={<PostPage user={user} profile={profile} />} />
           <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
           <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
-          <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat user={user} /> : <Login />} />
+          <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat /> : <Login />} />
+          <Route path="/notifications" element={user === undefined ? null : user ? <Notifications notifs={notifs} /> : <Login />} />
+          <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account profile={profile} pending={notifs.requests.length} /> : <Login />} />
           <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Login />} />
           <Route path="/reset" element={user ? <ResetPassword /> : <Login />} />
           <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Login />} />
@@ -85,6 +90,7 @@ export default function App() {
           <Route path="/mine" element={user ? <MyPosts /> : <Login />} />
         </Routes>
       </main>
+      {user && <BottomBar msgBadge={msgs.unread.size} notifBadge={notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length} />}
       <footer>
         <div className="disclaimer">
           <Icon n="shield" size={20} />

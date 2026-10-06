@@ -466,3 +466,31 @@ body{overflow-x:clip}
 
 /* map tiles: softer, cleaner look; inverted for dark mode */
 .leaflet-tile-pane{filter:saturate(.55) contrast(.94) brightness(1.04)}
+
+/* ===== mobile: floating bottom bar with labels; every item opens a page (no popups) ===== */
+.bottombar{display:none}
+.pagehead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.card.flush{padding:0;overflow:hidden}
+.card.flush .bellempty{padding:22px 18px;margin:0}
+.acrows{margin:14px 0}
+.acrow{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);color:var(--ink);font-weight:600}
+.acrow:last-child{border-bottom:0}.acrow span{flex:1}.acrow .chev{color:var(--mute)}
+.acrow .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;font-style:normal}
+.chatpage{padding-top:10px}
+.cwin.page{pointer-events:auto;width:100%;max-width:680px;margin:6px auto;height:calc(100dvh - 150px);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);animation:none}
+.cwin.page>header{cursor:default}
+@media(max-width:640px){
+  .mainnav.in{display:none}
+  .bottombar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:60;justify-content:space-around;align-items:flex-end;padding:8px 6px 7px;background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:26px;box-shadow:0 14px 40px rgba(20,25,45,.28)}
+  .bb-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--mute);font-size:11px;font-weight:600;min-width:0}
+  .bb-item.on{color:var(--ink)}
+  .bb-ic{position:relative;display:grid;place-items:center;width:34px;height:30px}
+  .bb-item.plus{color:var(--ink)}
+  .bb-item.plus .bb-ic{width:52px;height:52px;margin-top:-28px;border-radius:50%;background:var(--ink);color:var(--bg);border:4px solid var(--bg);box-shadow:0 8px 20px rgba(20,25,45,.3)}
+  .bb-lbl{line-height:1;white-space:nowrap}
+  .bb-ic .bellbadge{top:-5px;right:-3px}
+  body:has(.bottombar){padding-bottom:98px}
+  .cwin.page{height:calc(100dvh - 215px);margin-top:4px}
+  .flash{bottom:108px}
+  .citypop{bottom:100px}
+}
