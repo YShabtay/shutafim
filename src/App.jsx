@@ -49,7 +49,7 @@ export default function App() {
   return (
     <>
       <header className="top">
-        <Link to="/" className="logo"><Logo />שותפים</Link>
+        <Link to="/" className="logo"><Logo /><span className="logotxt">שותפים</span></Link>
         <nav>
           <button className="themebtn" onClick={toggleTheme} aria-label={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'} title={theme === 'dark' ? 'מצב בהיר' : 'מצב כהה'}>
             <Icon n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
@@ -61,7 +61,7 @@ export default function App() {
           {user && <>
             <MessagesMenu msgs={msgs} />
             <Bell notifs={notifs} />
-            <button className="btn dark" onClick={() => nav('/new')}><Icon n="plus" size={16} />פרסום דירה</button>
+            <button className="btn dark newpost" aria-label="פרסום דירה" onClick={() => nav('/new')}><Icon n="plus" size={16} /><span className="lbl">פרסום דירה</span></button>
             <UserMenu pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
           </>}
         </nav>

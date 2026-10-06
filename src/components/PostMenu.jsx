@@ -18,7 +18,7 @@ export default function PostMenu({ post, onChanged, afterDelete }) {
   const run = fn => async e => { stop(e); setOpen(false); await fn() }
   return (
     <div className="pmenu" ref={ref} onClick={stop}>
-      <button className="dots" aria-label="אפשרויות הפוסט" aria-expanded={open} onClick={e => { stop(e); setOpen(o => !o) }}><Icon n="dots" size={18} /></button>
+      <button className="pmdots" aria-label="אפשרויות הפוסט" aria-expanded={open} onClick={e => { stop(e); setOpen(o => !o) }}><Icon n="dots" size={18} /></button>
       {open && (
         <div className="pdrop">
           <button onClick={run(() => nav(`/post/${post.id}/edit`))}><Icon n="pencil" size={15} /> עריכת הפוסט</button>
