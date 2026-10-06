@@ -24,6 +24,7 @@ export function postPoint(p) {
 // עיגול ל-~100 מטר: שומרים מיקום משוער בלבד, לא כתובת מדויקת
 export const roundPoint = v => (v === '' || v == null ? null : Math.round(+v * 1000) / 1000)
 
+export const cityNames = () => Object.keys(CITIES)
 export const cityPoint = city => CITIES[(city || '').trim()] || null
 const km = (a, b) => { const R = 6371, d = Math.PI / 180, dy = (b[0] - a[0]) * d, dx = (b[1] - a[1]) * d; const h = Math.sin(dy / 2) ** 2 + Math.cos(a[0] * d) * Math.cos(b[0] * d) * Math.sin(dx / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)) }
 
