@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#2f6bff'
+const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--mapc').trim() || '#14182b'
 
 // מפה קטנה בעמוד הפוסט: אזור משוער בלבד (עיגול), לא כתובת מדויקת
 export default function MiniMap({ point }) {
