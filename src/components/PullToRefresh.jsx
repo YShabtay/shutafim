@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import Icon from './Icon'
+import Logo from './Logo'
 
 const TRIGGER = 80
 const SKIP = '.cwin, .dock, .leaflet-container, .modal, .confirm, textarea, input, select'
@@ -39,10 +39,18 @@ export default function PullToRefresh() {
   }, [])
 
   if (!pull && !busy) return null
-  const ready = pull >= TRIGGER * 0.5
+  const T = TRIGGER * 0.5
+  const p = Math.min(1, pull / T)
+  const ready = p >= 1
+  const C = 94.25 // היקף העיגול (רדיוס 15)
   return (
-    <div className="ptr" style={{ transform: `translate(-50%, ${pull}px)`, opacity: Math.min(1, pull / 30) }} aria-hidden="true">
-      <span className={busy ? 'spin' : ''} style={busy ? undefined : { transform: `rotate(${ready ? 180 : pull * 3}deg)` }}><Icon n="arrow" size={18} className="ptrarrow" /></span>
+    <div className={'ptr' + (ready ? ' ready' : '') + (busy ? ' busy' : '')} style={{ transform: `translate(-50%, ${pull}px) scale(${0.6 + 0.4 * p})`, opacity: Math.min(1, pull / 24) }} aria-hidden="true">
+      <svg className="ptrring" viewBox="0 0 36 36" width="48" height="48">
+        <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(20,25,45,.1)" strokeWidth="2.5" />
+        <circle className="ptrarc" cx="18" cy="18" r="15" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round"
+          strokeDasharray={busy ? '28 66' : C} strokeDashoffset={busy ? 0 : C * (1 - p)} />
+      </svg>
+      <span className="ptrlogo"><Logo size={24} /></span>
     </div>
   )
 }

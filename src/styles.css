@@ -622,8 +622,12 @@ button.acrow{width:100%;background:none;border:0;border-bottom:1px solid var(--l
 }
 
 /* pull to refresh */
-.ptr{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;z-index:90;width:40px;height:40px;margin-top:40px;border-radius:50%;background:var(--card);box-shadow:0 6px 20px rgba(20,25,45,.25);display:grid;place-items:center;pointer-events:none}
-.ptr span{display:grid;place-items:center;transition:transform .15s}
-.ptr .spin{animation:ptrspin .7s linear infinite}
-@keyframes ptrspin{to{transform:rotate(360deg)}}
-.ptrarrow{transform:rotate(-90deg)}
+.ptr{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;z-index:90;width:48px;height:48px;margin-top:40px;border-radius:50%;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(20,25,45,.22),0 0 0 1px rgba(20,25,45,.05);display:grid;place-items:center;pointer-events:none;transition:box-shadow .2s}
+.ptrring{position:absolute;inset:0;transform:rotate(-90deg)}
+.ptrarc{transition:stroke-dashoffset .05s linear}
+.ptrlogo{display:grid;place-items:center;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.ptr.ready .ptrlogo{transform:scale(1.18)}
+.ptr.busy .ptrring{animation:ptrspin .9s linear infinite}
+.ptr.busy .ptrlogo{animation:ptrpulse 1.2s ease-in-out infinite}
+@keyframes ptrspin{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}
+@keyframes ptrpulse{50%{transform:scale(.88)}}
