@@ -20,14 +20,13 @@
   <img src="docs/screenshots/desktop-signup.jpg" width="98%" alt="הרשמה" />
 </p>
 
-**בטלפון** (האתר מותקן כאפליקציה במסך הבית)
+**באייפון** (האתר מותקן כאפליקציה במסך הבית)
 
 <p align="center">
-  <img src="docs/screenshots/mobile-home.jpg" width="19%" alt="בית" />
-  <img src="docs/screenshots/mobile-listings.jpg" width="19%" alt="רשימה וסרגל תחתון" />
-  <img src="docs/screenshots/mobile-post.jpg" width="19%" alt="עמוד דירה" />
-  <img src="docs/screenshots/mobile-signup.jpg" width="19%" alt="הרשמה" />
-  <img src="docs/screenshots/mobile-chat.jpg" width="19%" alt="צ'אט" />
+  <img src="docs/screenshots/iphone-home.jpg" width="24%" alt="בית" />
+  <img src="docs/screenshots/iphone-map.jpg" width="24%" alt="חיפוש במפה" />
+  <img src="docs/screenshots/iphone-messages.jpg" width="24%" alt="רשימת שיחות" />
+  <img src="docs/screenshots/iphone-chat.jpg" width="24%" alt="צ'אט" />
 </p>
 
 ## מה יש באתר
