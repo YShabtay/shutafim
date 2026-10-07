@@ -230,8 +230,8 @@ footer{text-align:right}
 
 /* auth page layout */
 .authpage{position:relative;margin:0 calc(50% - 50vw);min-height:calc(100vh - 140px);display:grid;grid-template-columns:1fr 1fr}
-.authbg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0f1222}
-.authfrost{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to right,rgba(255,255,255,0) 15%,rgba(248,248,250,.55) 100%);-webkit-backdrop-filter:blur(24px) saturate(1.15);backdrop-filter:blur(24px) saturate(1.15);-webkit-mask-image:linear-gradient(to right,transparent 12%,#000 62%);mask-image:linear-gradient(to right,transparent 12%,#000 62%)}
+.authbg{position:fixed;inset:0;z-index:0;overflow:hidden;background:linear-gradient(160deg,#eef0f4,#e4e7ee)}
+.authfrost{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to right,rgba(255,255,255,0) 15%,rgba(244,245,248,.6) 100%);-webkit-backdrop-filter:blur(24px) saturate(1.15);backdrop-filter:blur(24px) saturate(1.15);-webkit-mask-image:linear-gradient(to right,transparent 12%,#000 62%);mask-image:linear-gradient(to right,transparent 12%,#000 62%)}
 .authpane{position:relative;z-index:2;display:grid;place-items:center;padding:28px clamp(16px,4vw,48px)}
 .authform{width:min(460px,100%);background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:26px;padding:32px clamp(20px,4vw,40px);box-shadow:0 30px 80px rgba(20,25,45,.28),0 0 0 1px rgba(255,255,255,.6) inset}
 body.authmode .top{background:rgba(255,255,255,.5);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border-bottom-color:rgba(255,255,255,.35)}
@@ -243,14 +243,14 @@ body.authmode footer{display:none}
 .mqcol.up{animation:mqup 90s linear infinite}.mqcol.down{animation:mqdown 90s linear infinite}
 @keyframes mqup{to{transform:translateY(-50%)}}
 @keyframes mqdown{from{transform:translateY(-50%)}to{transform:translateY(0)}}
-.mqcard{background:rgba(255,255,255,.96);color:#14182b;border-radius:16px;padding:8px 8px 12px;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.mqcard{background:#fff;color:#14182b;border-radius:16px;padding:8px 8px 12px;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(20,25,45,.14)}
 .mqcard b{font-size:13px;padding:6px 6px 0;line-height:1.3}
 .mqcard span{font-size:12px;color:#5b6074;padding:0 6px}
 .mqph{aspect-ratio:4/3;border-radius:11px;overflow:hidden;background:#eceef3}
 .mqph img{width:100%;height:100%;object-fit:cover;display:block}
 .mqph .plh{height:100%;border-radius:0}
 @media(prefers-reduced-motion:reduce){.mqcol{animation:none!important}}
-@media(max-width:820px){.authpage{grid-template-columns:1fr}.authfrost{background:rgba(15,18,34,.35);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);-webkit-mask-image:none;mask-image:none}.authpane{padding:28px 16px}.mq{grid-template-columns:repeat(3,1fr)}.mqcol:nth-child(n+4){display:none}}
+@media(max-width:820px){.authpage{grid-template-columns:1fr}.authfrost{background:rgba(238,240,244,.45);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);-webkit-mask-image:none;mask-image:none}.authpane{padding:28px 16px}.mq{grid-template-columns:repeat(3,1fr)}.mqcol:nth-child(n+4){display:none}}
 @media(max-width:560px){.mq{grid-template-columns:repeat(2,1fr)}.mqcol:nth-child(n+3){display:none}.authpane{padding:16px 12px}.authpage{min-height:calc(100vh - 120px)}}
 
 /* header: user menu */
