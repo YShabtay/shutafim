@@ -1,7 +1,7 @@
 // מצב דמו: הכול נשמר ב-localStorage. אנשים אחרים הם דמויות לדוגמה.
 import { compressImage, blobToDataUrl } from './image'
 
-const KEY = 'shutafim_posts_v3', NK = 'shutafim_notifs', CK = 'shutafim_convs', MK = 'shutafim_msgs', AK = 'shutafim_apps', PK = 'shutafim_profile'
+const KEY = 'shutafim_posts_v3', BK = 'shutafim_blocks', RK = 'shutafim_reports', NK = 'shutafim_notifs', CK = 'shutafim_convs', MK = 'shutafim_msgs', AK = 'shutafim_apps', PK = 'shutafim_profile'
 const USER = { id: 'demo', email: 'demo@local' }
 const iso = (daysAgo = 0) => new Date(Date.now() - 86400000 * daysAgo).toISOString()
 
@@ -175,17 +175,28 @@ export const api = {
   async getConversation(id) {
     const c = read(CK).find(x => x.id === id); if (!c) return null
     const application = read(AK).find(x => x.post_id === c.post_id && x.applicant_id === c.seeker_id) || null
-    return { ...withTitle(c), other: profileOf(c.owner_id === USER.id ? c.seeker_id : c.owner_id), application: application && { id: application.id, status: application.status } }
+    const otherId = c.owner_id === USER.id ? c.seeker_id : c.owner_id
+    return { ...withTitle(c), other: profileOf(otherId), blockedByMe: read(BK).includes(otherId), application: application && { id: application.id, status: application.status } }
   },
   async listMessages(cid) { return read(MK).filter(m => m.conversation_id === cid) },
   async sendMessage(cid, body) {
-    addMsg(cid, USER.id, body)
     const c = read(CK).find(x => x.id === cid)
     const other = c.owner_id === USER.id ? c.seeker_id : c.owner_id
+    if (read(BK).includes(other)) throw new Error('row-level security: blocked')
+    addMsg(cid, USER.id, body)
     setTimeout(() => addMsg(cid, other, 'תודה על ההודעה! (תשובה אוטומטית של מצב הדמו)'), 1200)
   },
   subscribeAllMessages(cb) { const t = setInterval(cb, 1500); return () => clearInterval(t) },
   subscribe(cid, cb) { const t = setInterval(() => this.listMessages(cid).then(cb), 1000); return () => clearInterval(t) },
+
+  // ---- דיווח וחסימה (דמו: נשמר בדפדפן) ----
+  async report(r) { write(RK, [...read(RK), { ...r, id: crypto.randomUUID(), created_at: new Date().toISOString() }]) },
+  async listBlocks() { return read(BK) },
+  async blockUser(id) {
+    if (!read(BK).includes(id)) write(BK, [...read(BK), id])
+    write(AK, read(AK).map(a => (a.owner_id === USER.id && a.applicant_id === id && ['pending', 'chatting'].includes(a.status) ? { ...a, status: 'declined' } : a)))
+  },
+  async unblockUser(id) { write(BK, read(BK).filter(x => x !== id)) },
 
   // ---- התראות ----
   async listNotifications() { return read(NK).slice(0, 30) },

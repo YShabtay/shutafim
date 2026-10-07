@@ -8,6 +8,7 @@ import ProfileCard from '../components/ProfileCard'
 import { useChatDock } from '../components/ChatDock'
 import { postPoint } from '../geo'
 import PostMenu from '../components/PostMenu'
+import { SafetyMenu } from '../components/safety'
 import { isComplete } from '../match'
 
 const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה של בעל הדירה.', declined: 'הבקשה לא אושרה הפעם. אפשר לחפש דירות נוספות.', withdrawn: 'הבקשה בוטלה.' }
@@ -112,7 +113,8 @@ export default function PostPage({ user, profile }) {
         </div>
 
         <aside className="card contact">
-          <div className="price">₪{p.rent.toLocaleString()}<small> / חודש</small></div>
+          <div className="priceline2"><div className="price">₪{p.rent.toLocaleString()}<small> / חודש</small></div>
+            {user && !mine && !p.is_sample && <SafetyMenu userId={p.owner_id} name={host?.first_name || 'המפרסם/ת'} target={{ type: 'post', id: p.id, what: 'הפוסט', label: 'דיווח על הפוסט' }} />}</div>
           {contactBox()}
           {err && <p className="err">{err}</p>}
         </aside>

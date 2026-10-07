@@ -166,7 +166,8 @@ export const api = {
     if (!c) return null
     const other = await this.getProfile(c.owner_id === u.id ? c.seeker_id : c.owner_id)
     const application = ok(await sb.from('applications').select('id, status').eq('post_id', c.post_id).eq('applicant_id', c.seeker_id).maybeSingle())
-    return { ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker', other, application }
+    const blockedByMe = ((await sb.from('blocks').select('blocked_id').eq('blocked_id', c.owner_id === u.id ? c.seeker_id : c.owner_id)).data || []).length > 0
+    return { ...c, title: c.posts?.title || '', role: c.owner_id === u.id ? 'owner' : 'seeker', other, application, blockedByMe }
   },
   async listMessages(cid) { return ok(await sb.from('messages').select('*').eq('conversation_id', cid).order('created_at')) || [] },
   async sendMessage(cid, body) {
@@ -187,6 +188,23 @@ export const api = {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${cid}` },
         () => this.listMessages(cid).then(cb)).subscribe()
     return () => sb.removeChannel(ch)
+  },
+
+  // ---- דיווח וחסימה ----
+  async report({ targetType, targetId, targetUserId, reason, details }) {
+    const u = await this.getUser()
+    ok(await sb.from('reports').insert({ reporter_id: u.id, target_type: targetType, target_id: String(targetId), target_user_id: targetUserId || null, reason, details: details || null }))
+  },
+  async listBlocks() { return (ok(await sb.from('blocks').select('blocked_id')) || []).map(x => x.blocked_id) },
+  async blockUser(id) {
+    const u = await this.getUser()
+    ok(await sb.from('blocks').upsert({ blocker_id: u.id, blocked_id: id }, { onConflict: 'blocker_id,blocked_id', ignoreDuplicates: true }))
+    // בקשות פתוחות של מי שנחסם נדחות
+    await sb.from('applications').update({ status: 'declined' }).eq('owner_id', u.id).eq('applicant_id', id).in('status', ['pending', 'chatting'])
+  },
+  async unblockUser(id) {
+    const u = await this.getUser()
+    ok(await sb.from('blocks').delete().eq('blocker_id', u.id).eq('blocked_id', id))
   },
 
   // ---- התראות ----

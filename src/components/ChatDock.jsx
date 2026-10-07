@@ -5,6 +5,7 @@ import Avatar from './Avatar'
 import Icon from './Icon'
 import { getSeen, markSeen } from '../seen'
 import { decide } from './decide'
+import { reportThing, toggleBlock } from './safety'
 
 const Ctx = createContext({ openChat: () => {}, isOpen: () => false, notifyIncoming: () => false })
 export const useChatDock = () => useContext(Ctx)
@@ -40,6 +41,7 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
   const [msgs, setMsgs] = useState([])
   const [text, setText] = useState('')
   const [err, setErr] = useState('')
+  const [tools, setTools] = useState(false) // פס דיווח וחסימה
   const end = useRef()
   const [, bump] = useState(0)
   useEffect(() => { const h = () => bump(n => n + 1); window.addEventListener('shutafim:seen', h); return () => window.removeEventListener('shutafim:seen', h) }, [])
@@ -67,9 +69,12 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
     e.preventDefault()
     const body = text.trim(); if (!body) return
     setText(''); setErr('')
-    try { await api.sendMessage(cid, body); setMsgs(await api.listMessages(cid)) } catch (x) { setErr(x.message); setText(body) }
+    try { await api.sendMessage(cid, body); setMsgs(await api.listMessages(cid)) }
+    catch (x) { setErr(/row-level|violates|blocked/i.test(x.message) ? 'לא ניתן לשלוח הודעות בשיחה הזו' : x.message); setText(body) }
   }
   const name = conv?.other ? conv.other.first_name : conv?.title || '…'
+  const otherId = conv?.other?.user_id
+  const refreshConv = async () => setConv(await api.getConversation(cid))
   return (
     <section className={'cwin' + (min ? ' min' : '') + (unread ? ' unread' : '') + (page ? ' page' : '')} aria-label={'צ\'אט עם ' + name}>
       <header onClick={page ? undefined : onToggle}>
@@ -77,10 +82,18 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
         {conv?.other && <Avatar profile={conv.other} size={30} />}
         <div className="cwin-title"><b>{name}</b>{(unread ? last?.body : conv?.title) && <small>{unread ? last.body : conv.title}</small>}</div>
         {unread && <i className="cwin-dot" aria-label="הודעה חדשה" />}
+        {otherId && !min && <button aria-label="דיווח וחסימה" aria-expanded={tools} onClick={e => { e.stopPropagation(); setTools(t => !t) }}><Icon n="dots" size={16} /></button>}
         {!page && <button aria-label={min ? 'הרחב' : 'מזער'} onClick={e => { e.stopPropagation(); onToggle() }}><Icon n="minus" size={16} /></button>}
         {!page && <button aria-label="סגור" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="x" size={16} /></button>}
       </header>
       {!min && <>
+        {tools && otherId && (
+          <div className="safetystrip">
+            <button onClick={() => { setTools(false); reportThing({ type: 'chat', id: cid, userId: otherId, what: `השיחה עם ${name}` }) }}><Icon n="shield" size={14} /> דיווח על השיחה</button>
+            <button className={conv?.blockedByMe ? '' : 'danger'} onClick={async () => { setTools(false); await toggleBlock(otherId, name, !!conv?.blockedByMe); refreshConv() }}>
+              <Icon n="x" size={14} /> {conv?.blockedByMe ? 'ביטול חסימה' : `חסימת ${name}`}</button>
+          </div>
+        )}
         <div className="cwin-msgs">
           {conv === null && <p className="meta">השיחה לא נמצאה.</p>}
           {conv && (() => { const st = conv.application?.status
@@ -92,12 +105,13 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
               <button className="btn primary" onClick={() => act('accepted')}>אישור כניסה לדירה</button>
               <button className="btn ghost" onClick={() => act('declined')}>דחייה</button>
             </div>)}
-                    {msgs.map(m => <div key={m.id} className={'bubble ' + (m.sender_id === me?.id ? 'me' : 'them')}>{m.body}</div>)}
+          {conv?.blockedByMe && <div className="sysmsg no">חסמת את {name}. לא ניתן לשלוח הודעות</div>}
+          {msgs.map(m => <div key={m.id} className={'bubble ' + (m.sender_id === me?.id ? 'me' : 'them')}>{m.body}</div>)}
           <div ref={end} />
         </div>
         {err && <p className="err small">{err}</p>}
         <form className="cwin-send" onSubmit={send}>
-          <input value={text} onChange={e => setText(e.target.value)} placeholder="כתבו הודעה…" maxLength={2000} />
+          <input value={text} onChange={e => setText(e.target.value)} placeholder={conv?.blockedByMe ? 'השיחה חסומה' : 'כתבו הודעה…'} disabled={!!conv?.blockedByMe} maxLength={2000} />
           <button className="btn primary" aria-label="שלח"><Icon n="arrow" size={16} className="flip" /></button>
         </form>
       </>}

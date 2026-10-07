@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useChatDock } from '../components/ChatDock'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
+import { SafetyMenu } from '../components/safety'
 import { decide as decideApp, STATUS } from '../components/decide'
 import { matchScore, profileToFilter } from '../match'
 
@@ -47,6 +48,7 @@ export default function Inbox() {
               <Link to={`/post/${a.post_id}`} className="forpost">לדירה: {a.post?.title}</Link>
               {(a.status === 'pending' || a.status === 'chatting') && a.score != null ? <span className={'match ' + (a.score >= 80 ? 'hi' : a.score >= 50 ? 'mid' : 'lo')}><i />{a.score}% התאמה</span>
                 : <span className={'tag ' + a.status}>{STATUS[a.status]}</span>}
+              <SafetyMenu userId={a.applicant_id} name={a.profile?.first_name || 'המבקש/ת'} target={{ type: 'profile', id: a.applicant_id, what: 'המשתמש', label: 'דיווח על המשתמש' }} onChange={load} />
             </div>
             <ProfileCard profile={a.profile} />
             {a.message && <blockquote className="msg">{a.message}</blockquote>}
