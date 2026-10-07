@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import Avatar from './Avatar'
 import Icon from './Icon'
 import { isComplete } from '../match'
+import { isSoundOn, playDing, setSoundOn } from '../sound'
 
 export default function UserMenu({ profile, pending = 0, canSignOut, onSignOut }) {
   const [open, setOpen] = useState(false)
+  const [sound, setSound] = useState(isSoundOn())
   const ref = useRef()
   useEffect(() => {
     const close = e => { if (!ref.current?.contains(e.target)) setOpen(false) }
@@ -27,6 +29,7 @@ export default function UserMenu({ profile, pending = 0, canSignOut, onSignOut }
           <Link to="/profile">הפרופיל שלי</Link>
           <Link to="/mine">הפוסטים שלי</Link>
           <Link to="/inbox" className="withcnt">בקשות והודעות{pending > 0 && <i className="cnt">{pending}</i>}</Link>
+          <button onClick={e => { e.stopPropagation(); const on = !sound; setSound(on); setSoundOn(on); if (on) playDing('notif') }}>{sound ? 'צלילי התראה: פועלים' : 'צלילי התראה: כבויים'}</button>
           {canSignOut && <button onClick={onSignOut}>יציאה</button>}
         </div>
       )}

@@ -4,4 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { ChatDockProvider } from './components/ChatDock'
 import './styles.css'
+import { unlockAudio } from './sound'
+['pointerdown', 'keydown', 'touchstart'].forEach(e => window.addEventListener(e, unlockAudio, { passive: true }))
 createRoot(document.getElementById('root')).render(<BrowserRouter><ChatDockProvider><App /></ChatDockProvider></BrowserRouter>)

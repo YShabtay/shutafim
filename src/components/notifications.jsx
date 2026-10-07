@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useChatDock } from './ChatDock'
 import Icon from './Icon'
 import { markSeen } from '../seen'
+import { playDing } from '../sound'
 
 export const notifText = n => {
   const who = n.actor_name || 'מישהו'
@@ -38,7 +39,7 @@ export function useNotifications(enabled) {
     if (seen.current === null) { seen.current = new Set(keys); return }
     const fresh = l.find(n => !n.read && !seen.current.has(n.id + '|' + n.created_at))
     keys.forEach(k => seen.current.add(k))
-    if (fresh) { setToast(fresh); setTimeout(() => setToast(t => (t === fresh ? null : t)), 7000) }
+    if (fresh) { playDing('notif'); setToast(fresh); setTimeout(() => setToast(t => (t === fresh ? null : t)), 7000) }
   }
   useEffect(() => {
     if (!enabled) { setList([]); setRequests([]); setInTalks([]); seen.current = null; return }

@@ -3,10 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import Avatar from './Avatar'
 import Icon from './Icon'
-import { markSeen } from '../seen'
+import { getSeen, markSeen } from '../seen'
 import { decide } from './decide'
 
-const Ctx = createContext({ openChat: () => {}, isOpen: () => false })
+const Ctx = createContext({ openChat: () => {}, isOpen: () => false, notifyIncoming: () => false })
 export const useChatDock = () => useContext(Ctx)
 
 // חלונות צ'אט קטנים בפינה, כמו במסנג'ר: עד 3 שיחות פתוחות, אפשר למזער ולסגור
@@ -17,11 +17,17 @@ export function ChatDockProvider({ children }) {
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches
   // בנייד שיחה נפתחת כעמוד מלא ולא כחלון צף
   const openChat = id => isMobile() ? nav(`/chat/${id}`) : setWins(w => (w.some(x => x.id === id) ? w.map(x => (x.id === id ? { ...x, min: false } : x)) : [...w.slice(-2), { id, min: false }]))
+  // הודעה חדשה במחשב: קופץ למטה חלון ממוזער וממתין שיפתחו אותו (כמו בפייסבוק). בנייד מחזיר false והאתר מציג בועה במקום.
+  const notifyIncoming = id => {
+    if (isMobile()) return false
+    setWins(w => (w.some(x => x.id === id) ? w : [...w.slice(-2), { id, min: true }]))
+    return true
+  }
   const close = id => setWins(w => w.filter(x => x.id !== id))
   const toggle = id => setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
   const isOpen = id => wins.some(x => x.id === id && !x.min) || loc.pathname === `/chat/${id}`
   return (
-    <Ctx.Provider value={{ openChat, isOpen }}>
+    <Ctx.Provider value={{ openChat, isOpen, notifyIncoming }}>
       {children}
       <div className="dock">{wins.map(w => <ChatWindow key={w.id} cid={w.id} min={w.min} onClose={() => close(w.id)} onToggle={() => toggle(w.id)} />)}</div>
     </Ctx.Provider>
@@ -35,6 +41,10 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
   const [text, setText] = useState('')
   const [err, setErr] = useState('')
   const end = useRef()
+  const [, bump] = useState(0)
+  useEffect(() => { const h = () => bump(n => n + 1); window.addEventListener('shutafim:seen', h); return () => window.removeEventListener('shutafim:seen', h) }, [])
+  const last = msgs[msgs.length - 1]
+  const unread = !!(min && last && me && last.sender_id !== me.id && last.created_at > (getSeen(me.id)[cid] || ''))
   useEffect(() => {
     api.getUser().then(setMe)
     api.getConversation(cid).then(setConv)
@@ -61,11 +71,12 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
   }
   const name = conv?.other ? conv.other.first_name : conv?.title || '…'
   return (
-    <section className={'cwin' + (min ? ' min' : '') + (page ? ' page' : '')} aria-label={'צ\'אט עם ' + name}>
+    <section className={'cwin' + (min ? ' min' : '') + (unread ? ' unread' : '') + (page ? ' page' : '')} aria-label={'צ\'אט עם ' + name}>
       <header onClick={page ? undefined : onToggle}>
         {page && <button aria-label="חזרה" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="arrow" size={16} /></button>}
         {conv?.other && <Avatar profile={conv.other} size={30} />}
-        <div className="cwin-title"><b>{name}</b>{conv?.title && <small>{conv.title}</small>}</div>
+        <div className="cwin-title"><b>{name}</b>{(unread ? last?.body : conv?.title) && <small>{unread ? last.body : conv.title}</small>}</div>
+        {unread && <i className="cwin-dot" aria-label="הודעה חדשה" />}
         {!page && <button aria-label={min ? 'הרחב' : 'מזער'} onClick={e => { e.stopPropagation(); onToggle() }}><Icon n="minus" size={16} /></button>}
         {!page && <button aria-label="סגור" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="x" size={16} /></button>}
       </header>
