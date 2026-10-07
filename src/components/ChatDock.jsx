@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import Avatar from './Avatar'
 import Icon from './Icon'
-import { getSeen, markSeen } from '../seen'
+import { getSeen, markSeen, markUnread } from '../seen'
 import { decide } from './decide'
 import { reportThing, toggleBlock } from './safety'
 
@@ -29,7 +29,15 @@ export function ChatDockProvider({ children }) {
   const toggle = id => {
     if (isMobile()) {
       setWins(w => w.map(x => (x.id === id ? { ...x, closing: true } : x)))
-      setTimeout(() => close(id), 260)
+      setTimeout(async () => {
+        close(id)
+        // ההודעה האחרונה מהצד השני ועוד לא נענתה: נשארת התראה על אייקון ההודעות. אם עניתי, אין התראה.
+        try {
+          const [me, list] = await Promise.all([api.getUser(), api.listMessages(id)])
+          const last = list[list.length - 1]
+          if (me && last && last.sender_id !== me.id) markUnread(me.id, id, list[list.length - 2]?.created_at)
+        } catch {}
+      }, 260)
       return
     }
     setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
