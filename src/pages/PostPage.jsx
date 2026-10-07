@@ -9,6 +9,7 @@ import { useChatDock } from '../components/ChatDock'
 import { postPoint } from '../geo'
 import PostMenu from '../components/PostMenu'
 import { SafetyMenu } from '../components/safety'
+import Gallery from '../components/Gallery'
 import { isComplete } from '../match'
 
 const STATUS_TXT = { pending: 'הבקשה נשלחה וממתינה לתשובה של בעל הדירה.', declined: 'הבקשה לא אושרה הפעם. אפשר לחפש דירות נוספות.', withdrawn: 'הבקשה בוטלה.' }
@@ -24,7 +25,6 @@ export default function PostPage({ user, profile }) {
   const [app, setApp] = useState(undefined)
   const [social, setSocial] = useState('')
   const [msg, setMsg] = useState('')
-  const [big, setBig] = useState(0)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   useEffect(() => { api.getPost(id).then(setP) }, [id])
@@ -79,10 +79,7 @@ export default function PostPage({ user, profile }) {
       <Link to="/" className="back"><Icon n="arrow" size={16} /> חזרה לדירות</Link>
       <div className="postgrid">
         <div>
-          {p.photos?.length > 0 ? <>
-            <img className="gallery" src={p.photos[big]} alt="" />
-            {p.photos.length > 1 && <div className="thumbs">{p.photos.map((u, i) => <img key={u} src={u} alt="" className={i === big ? 'on' : ''} onClick={() => setBig(i)} />)}</div>}
-          </> : <Placeholder id={p.id} className="gallery" />}
+          {p.photos?.length > 0 ? <Gallery key={p.id} photos={p.photos} /> : <Placeholder id={p.id} className="gallery" />}
 
           <div className="detail">
             <h1 className="titlerow"><span>{p.title}</span>{mine && <PostMenu post={p} onChanged={() => api.getPost(id).then(setP)} afterDelete={() => nav('/mine')} />}{p.is_sample && <span className="sampletag inline">דוגמה</span>}</h1>
