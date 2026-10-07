@@ -232,9 +232,21 @@ footer{text-align:right}
 .authpage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);max-width:1000px;margin:28px auto;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:var(--card);box-shadow:0 14px 44px rgba(20,25,45,.14)}
 .authform{padding:34px clamp(20px,4vw,44px)}
 .authform .authbox{max-width:420px;margin:0 auto}
-.authside{position:relative;background-size:cover;background-position:78% center;min-height:560px;color:#fff;display:flex;align-items:flex-end}
-.authside::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,14,30,.25),rgba(10,14,30,.85))}
-.authside-in{position:relative;padding:34px 30px}
+.authside{position:relative;background:#0f1222;overflow:hidden;min-height:560px;color:#fff;display:flex;align-items:flex-end}
+.authside::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(15,18,34,.55) 0%,rgba(15,18,34,.1) 28%,rgba(15,18,34,.78) 62%,rgba(15,18,34,.97) 100%)}
+.mq{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 16px;transform:rotate(-6deg) scale(1.2)}
+.mqcol{display:flex;flex-direction:column;gap:14px;will-change:transform}
+.mqcol.up{animation:mqup 48s linear infinite}.mqcol.down{animation:mqdown 48s linear infinite}
+@keyframes mqup{to{transform:translateY(-50%)}}
+@keyframes mqdown{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.mqcard{background:rgba(255,255,255,.96);color:#14182b;border-radius:16px;padding:8px 8px 12px;display:flex;flex-direction:column;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.mqcard b{font-size:13px;padding:6px 6px 0;line-height:1.3}
+.mqcard span{font-size:12px;color:#5b6074;padding:0 6px}
+.mqph{aspect-ratio:4/3;border-radius:11px;overflow:hidden;background:#eceef3}
+.mqph img{width:100%;height:100%;object-fit:cover;display:block}
+.mqph .plh{height:100%;border-radius:0}
+@media(prefers-reduced-motion:reduce){.mqcol{animation:none!important}}
+.authside-in{position:relative;z-index:2;padding:34px 30px}
 .authside h2{font-size:26px;line-height:1.3;margin-bottom:18px}
 .authside ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
 .authside li{display:flex;align-items:center;gap:10px;font-size:15px}

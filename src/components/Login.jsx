@@ -4,6 +4,7 @@ import { api, hasBackend, enterGuest } from '../api'
 import { usernameError } from '../blocklist'
 import Icon from './Icon'
 import NumberInput from './NumberInput'
+import Placeholder from './Placeholder'
 
 // סיסמה: לפחות 8 תווים, אות ומספר. הדירוג עוזר לבחור סיסמה חזקה יותר.
 export const passwordOk = p => p.length >= 8 && /[A-Za-z֐-׿]/.test(p) && /\d/.test(p)
@@ -26,13 +27,48 @@ const explain = msg => {
   return msg
 }
 
-const IMG = '/hero-light.jpg'
+const FALLBACK = [
+  { id: 'f1', title: 'חדר בדירת 3 חדרים', city: 'תל אביב', rent: 3200 },
+  { id: 'f2', title: 'חדר מרווח ליד האוניברסיטה', city: 'ירושלים', rent: 2100 },
+  { id: 'f3', title: 'דירת שותפים עם מרפסת', city: 'חיפה', rent: 1900 },
+  { id: 'f4', title: 'חדר שקט בלב העיר', city: 'רמת גן', rent: 2700 },
+  { id: 'f5', title: 'חדר בדירה משופצת', city: 'באר שבע', rent: 1600 },
+  { id: 'f6', title: 'חדר עם מרפסת פרטית', city: 'הרצליה', rent: 3000 },
+]
+
+// מודעות רצות לאורך הצד: שתי עמודות שנעות בכיוונים הפוכים
+function Ads() {
+  const [posts, setPosts] = useState(null)
+  useEffect(() => { api.listPosts().then(l => setPosts(l.slice(0, 12))).catch(() => setPosts([])) }, [])
+  const list = posts && posts.length >= 4 ? posts : FALLBACK
+  const cols = [list.filter((_, i) => i % 2 === 0), list.filter((_, i) => i % 2 === 1)].map(c => {
+    let a = c
+    while (a.length < 4) a = [...a, ...c]
+    return [...a, ...a]
+  })
+  return (
+    <div className="mq" aria-hidden="true">
+      {cols.map((c, i) => (
+        <div key={i} className={'mqcol ' + (i ? 'down' : 'up')}>
+          {c.map((p, j) => (
+            <div key={p.id + '-' + j} className="mqcard">
+              <div className="mqph">{p.photos?.[0] ? <img src={p.photos[0]} alt="" loading="lazy" /> : <Placeholder />}</div>
+              <b>{p.title}</b>
+              <span>{p.city} · ₪{Number(p.rent).toLocaleString('he-IL')}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function Shell({ children }) {
   return (
     <div className="authpage">
       <div className="authform">{children}</div>
-      <aside className="authside" style={{ backgroundImage: `url(${IMG})` }}>
+      <aside className="authside">
+        <Ads />
         <div className="authside-in">
           <h2>הבית הבא שלך מתחיל בשותפים הנכונים</h2>
           <ul>
