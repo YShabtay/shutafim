@@ -42,7 +42,7 @@ function Ads() {
   useEffect(() => { api.listPosts().then(l => setPosts(l.slice(0, 12))).catch(() => setPosts([])) }, [])
   const list = posts && posts.length >= 4 ? posts : FALLBACK
   // כל עמודה מציגה את כל המודעות, בסדר שונה, ופעמיים כדי שהלולאה תהיה חלקה
-  const cols = [0, 1, 2].map(i => {
+  const cols = [0, 1, 2, 3, 4].map(i => {
     const k = (i * 2) % list.length
     let a = [...list.slice(k), ...list.slice(0, k)]
     while (a.length < 5) a = [...a, ...a]
@@ -66,10 +66,12 @@ function Ads() {
 }
 
 function Shell({ children }) {
+  // מצב מיוחד לעמוד הזה: סרגל עליון שקוף ורקע מודעות מאחורי הכול
+  useEffect(() => { document.body.classList.add('authmode'); return () => document.body.classList.remove('authmode') }, [])
   return (
     <div className="authpage">
+      <div className="authbg"><Ads /><div className="authfrost" /></div>
       <div className="authpane"><div className="authform">{children}</div></div>
-      <div className="authart"><Ads /></div>
     </div>
   )
 }
