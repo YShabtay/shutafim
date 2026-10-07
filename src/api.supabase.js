@@ -207,6 +207,24 @@ export const api = {
     ok(await sb.from('blocks').delete().eq('blocker_id', u.id).eq('blocked_id', id))
   },
 
+  // ---- ניהול (רק למנהלים) ----
+  async isAdmin() { const { data, error } = await sb.rpc('is_admin'); return !error && data === true },
+  async adminReports() {
+    const rows = ok(await sb.from('reports').select('*').order('created_at', { ascending: false }).limit(200)) || []
+    const postIds = rows.filter(r => r.target_type === 'post').map(r => r.target_id)
+    const posts = postIds.length ? ok(await sb.from('posts').select('id, title, city, rent, status, owner_id').in('id', postIds)) || [] : []
+    const uids = [...new Set(rows.flatMap(r => [r.reporter_id, r.target_user_id]).filter(Boolean))]
+    const profs = await profilesByIds(uids)
+    return rows.map(r => ({
+      ...r,
+      post: posts.find(p => p.id === r.target_id) || null,
+      reporter: profs[r.reporter_id] || null,
+      target: profs[r.target_user_id] || null,
+      againstSameUser: rows.filter(x => x.target_user_id && x.target_user_id === r.target_user_id).length,
+    }))
+  },
+  async adminSetReportStatus(id, status) { ok(await sb.from('reports').update({ status }).eq('id', id)) },
+
   // ---- התראות ----
   async listNotifications() { return ok(await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(30)) || [] },
   async markNotificationRead(id) { await sb.from('notifications').update({ read: true }).eq('id', id) },

@@ -198,6 +198,18 @@ export const api = {
   },
   async unblockUser(id) { write(BK, read(BK).filter(x => x !== id)) },
 
+  // ---- ניהול (בדמו כולם מנהלים) ----
+  async isAdmin() { return true },
+  async adminReports() {
+    const posts = load(), rows = read(RK).slice().reverse()
+    return rows.map(r => ({
+      ...r, id: r.id, reporter_id: USER.id, target_type: r.targetType, target_id: r.targetId, target_user_id: r.targetUserId, status: r.status || 'open',
+      post: posts.find(p => p.id === r.targetId) || null, reporter: myProfile(), target: profileOf(r.targetUserId),
+      againstSameUser: rows.filter(x => x.targetUserId && x.targetUserId === r.targetUserId).length,
+    }))
+  },
+  async adminSetReportStatus(id, status) { write(RK, read(RK).map(r => (r.id === id ? { ...r, status } : r))) },
+
   // ---- התראות ----
   async listNotifications() { return read(NK).slice(0, 30) },
   async markNotificationRead(id) { write(NK, read(NK).map(n => (n.id === id ? { ...n, read: true } : n))) },

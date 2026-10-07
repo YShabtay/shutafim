@@ -557,3 +557,10 @@ button.acrow{width:100%;background:none;border:0;border-bottom:1px solid var(--l
 .safetystrip button.danger{color:#dc2626}
 .cwin-send input:disabled{opacity:.55}
 .appcard-top .pmenu{margin-inline-start:auto}
+
+/* admin reports */
+.repcard{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.reptop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.reptop small{color:var(--mute);margin-inline-start:auto}
+.reason-badge{background:#fde8e8;color:#b91c1c;border-radius:99px;padding:3px 12px;font-size:13px}
+.repwhat{margin:0;font-size:16px;line-height:1.6}.repwhat a{font-weight:700;color:var(--ink);text-decoration:underline}
+.warn{color:#b91c1c}

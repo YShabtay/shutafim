@@ -14,6 +14,7 @@ import Bell from './components/Bell'
 import BottomBar from './components/BottomBar'
 import Notifications from './pages/Notifications'
 import Account from './pages/Account'
+import Admin from './pages/Admin'
 import MessagesMenu from './components/MessagesMenu'
 import { MessageToast, Toast, useNotifications } from './components/notifications'
 import { useConversations } from './components/useConversations'
@@ -37,6 +38,8 @@ export default function App() {
   useEffect(() => { window.scrollTo(0, 0) }, [pathname]) // כל מעבר לדף חדש מתחיל מלמעלה
   const notifs = useNotifications(!!user)
   const msgs = useConversations(user?.id)
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => { if (user) api.isAdmin().then(setIsAdmin).catch(() => setIsAdmin(false)); else setIsAdmin(false) }, [user?.id])
   const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length + msgs.unread.size
   useEffect(() => { document.title = (totalUnread ? `(${totalUnread}) ` : '') + 'שותפים – מצאו שותפים לדירה' }, [totalUnread])
   useEffect(() => api.onAuth(setUser), [])
@@ -60,7 +63,7 @@ export default function App() {
               <MessagesMenu msgs={msgs} />
               <Bell notifs={notifs} />
               <button className="btn dark newpost" aria-label="פרסום דירה" onClick={() => nav('/new')}><Icon n="plus" size={16} /><span className="lbl">פרסום דירה</span></button>
-              <UserMenu pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
+              <UserMenu isAdmin={isAdmin} pending={notifs.requests.length} profile={profile} canSignOut={api.mode === 'supabase'} onSignOut={() => api.signOut()} />
             </>}
           </nav>
         </div>
@@ -85,9 +88,10 @@ export default function App() {
           <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
           <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat /> : <Login />} />
           <Route path="/notifications" element={user === undefined ? null : user ? <Notifications notifs={notifs} /> : <Login />} />
-          <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account profile={profile} pending={notifs.requests.length} /> : <Login />} />
+          <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account isAdmin={isAdmin} profile={profile} pending={notifs.requests.length} /> : <Login />} />
           <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Login />} />
           <Route path="/reset" element={user ? <ResetPassword /> : <Login />} />
+          <Route path="/admin" element={user === undefined ? null : user ? <Admin /> : <Login />} />
           <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Login />} />
           <Route path="/legal/:doc" element={<Legal />} />
           <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Login />} />
