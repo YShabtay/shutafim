@@ -620,3 +620,10 @@ button.acrow{width:100%;background:none;border:0;border-bottom:1px solid var(--l
   .cwin.min .cwin-title small{max-width:48vw}
   .cwin-send{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 }
+
+/* pull to refresh */
+.ptr{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;z-index:90;width:40px;height:40px;margin-top:40px;border-radius:50%;background:var(--card);box-shadow:0 6px 20px rgba(20,25,45,.25);display:grid;place-items:center;pointer-events:none}
+.ptr span{display:grid;place-items:center;transition:transform .15s}
+.ptr .spin{animation:ptrspin .7s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
+.ptrarrow{transform:rotate(-90deg)}

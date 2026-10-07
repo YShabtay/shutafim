@@ -30,6 +30,7 @@ import Debug from './pages/Debug'
 import EditPost from './pages/EditPost'
 import Logo from './components/Logo'
 import Icon from './components/Icon'
+import PullToRefresh from './components/PullToRefresh'
 
 export default function App() {
   const [user, setUser] = useState(undefined)
@@ -69,6 +70,7 @@ export default function App() {
           </nav>
         </div>
       </header>
+      <PullToRefresh />
       <FlashHost />
       <ConfirmHost />
       <ReportHost />
