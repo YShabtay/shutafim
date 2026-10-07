@@ -16,8 +16,8 @@ export function ChatDockProvider({ children }) {
   const nav = useNavigate()
   const loc = useLocation()
   const isMobile = () => window.matchMedia('(max-width: 640px)').matches
-  // בנייד שיחה נפתחת כעמוד מלא ולא כחלון צף
-  const openChat = id => isMobile() ? nav(`/chat/${id}`) : setWins(w => (w.some(x => x.id === id) ? w.map(x => (x.id === id ? { ...x, min: false } : x)) : [...w.slice(-2), { id, min: false }]))
+  // גם בנייד השיחה נפתחת כחלון: למעלה מסך שיחה, וכשממזערים נשארת בועה קטנה מעל הסרגל התחתון ואפשר להמשיך לגלול באתר
+  const openChat = id => setWins(w => (w.some(x => x.id === id) ? w.map(x => (x.id === id ? { ...x, min: false } : x)) : [...w.slice(-2), { id, min: false }]))
   // הודעה חדשה במחשב: קופץ למטה חלון ממוזער וממתין שיפתחו אותו (כמו בפייסבוק). בנייד מחזיר false והאתר מציג בועה במקום.
   const notifyIncoming = id => {
     if (isMobile()) return false
@@ -26,11 +26,21 @@ export function ChatDockProvider({ children }) {
   }
   const close = id => setWins(w => w.filter(x => x.id !== id))
   const toggle = id => setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
+  // המקלדת בנייד מכווצת רק את אזור התצוגה, כך שהחלון נשאר מעליה ושדה ההקלדה לא נחסם
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const h = () => document.documentElement.style.setProperty('--kb', Math.max(0, window.innerHeight - vv.height - vv.offsetTop) + 'px')
+    vv.addEventListener('resize', h); vv.addEventListener('scroll', h); h()
+    return () => { vv.removeEventListener('resize', h); vv.removeEventListener('scroll', h) }
+  }, [])
+  const openWin = wins.find(x => !x.min)
   const isOpen = id => wins.some(x => x.id === id && !x.min) || loc.pathname === `/chat/${id}`
   return (
     <Ctx.Provider value={{ openChat, isOpen, notifyIncoming }}>
       {children}
-      <div className="dock">{wins.map(w => <ChatWindow key={w.id} cid={w.id} min={w.min} onClose={() => close(w.id)} onToggle={() => toggle(w.id)} />)}</div>
+      {openWin && <div className="dockback" onClick={() => toggle(openWin.id)} />}
+      <div className={'dock' + (openWin ? ' open' : '')}>{wins.map(w => <ChatWindow key={w.id} cid={w.id} min={w.min} onClose={() => close(w.id)} onToggle={() => toggle(w.id)} />)}</div>
     </Ctx.Provider>
   )
 }
