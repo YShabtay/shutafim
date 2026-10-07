@@ -631,3 +631,22 @@ button.acrow{width:100%;background:none;border:0;border-bottom:1px solid var(--l
 .ptr.busy .ptrlogo{animation:ptrpulse 1.2s ease-in-out infinite}
 @keyframes ptrspin{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}
 @keyframes ptrpulse{50%{transform:scale(.88)}}
+
+/* chat list rows (messages page) */
+.chatlist{padding:6px 0}
+.chatrow{display:flex;align-items:center;gap:12px;width:100%;text-align:right;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink)}
+.chatrow:first-child{border-top:0}
+.chatrow:hover{background:var(--soft)}
+.chatrow-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.chatrow-top{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}
+.chatrow-top b{font-size:16px}.chatrow-top small{color:var(--mute);font-size:14px}
+.chatrow-top em{font-style:normal;font-size:11.5px;font-weight:600;color:var(--mute);background:var(--soft);padding:2px 9px;border-radius:99px;margin-inline-start:6px}
+.chatrow-post{font-size:12.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chatrow-last{font-size:14px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chatrow.unread .chatrow-last{color:var(--ink);font-weight:700}
+.chatrow-meta{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
+.chatrow-meta small{color:var(--mute);font-size:12px}
+@media(max-width:640px){
+  .dock .cwin.closing{animation:cwclose .26s ease-in forwards;transform-origin:68% 100%}
+  @keyframes cwclose{to{transform:translateY(40px) scale(.15);opacity:0}}
+}

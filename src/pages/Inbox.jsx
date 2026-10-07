@@ -4,6 +4,8 @@ import { api } from '../api'
 import { useChatDock } from '../components/ChatDock'
 import ProfileCard from '../components/ProfileCard'
 import Icon from '../components/Icon'
+import Avatar from '../components/Avatar'
+import { ago } from '../components/notifications'
 import { SafetyMenu } from '../components/safety'
 import { decide as decideApp, STATUS } from '../components/decide'
 import { matchScore, profileToFilter } from '../match'
@@ -11,7 +13,7 @@ import { matchScore, profileToFilter } from '../match'
 
 const ORDER = { pending: 0, chatting: 1, accepted: 2, declined: 3, withdrawn: 4 }
 // מרכז אחד: בקשות שהגיעו אליי מכל הדירות, בקשות ששלחתי, ושיחות
-export default function Inbox() {
+export default function Inbox({ msgs }) {
   const { openChat } = useChatDock()
   const [q, setQ] = useSearchParams()
   const [incoming, setIncoming] = useState(null)
@@ -79,14 +81,22 @@ export default function Inbox() {
         ))}
       </div>}
 
-      {tab === 'chats' && <div className="card">
-        {convs.length === 0 && <p className="meta">שיחה נפתחת אחרי שבקשה אושרה.</p>}
-        {convs.map(c => (
-          <div key={c.id} className="row">
-            <button className="linkbtn plain" onClick={() => openChat(c.id)}>{c.title}</button>
-            <span className="tag">{c.role === 'owner' ? 'מתעניין/ת בדירה שלך' : 'בעל/ת הדירה'}</span>
-          </div>
-        ))}
+      {tab === 'chats' && <div className="card chatlist">
+        {(msgs?.convs || convs).length === 0 && <p className="meta">שיחה נפתחת אחרי שבקשה אושרה.</p>}
+        {(msgs?.convs || convs).map(c => {
+          const unread = !!msgs?.unread?.has(c.id)
+          return (
+            <button key={c.id} className={'chatrow' + (unread ? ' unread' : '')} onClick={() => openChat(c.id)}>
+              <Avatar profile={c.other || { first_name: '?' }} size={48} />
+              <span className="chatrow-text">
+                <span className="chatrow-top"><b>{c.other?.first_name || 'משתמש'}</b>{c.other?.age ? <small>, {c.other.age}</small> : null}<em>{c.role === 'owner' ? 'מתעניין/ת בדירה שלך' : 'בעל/ת הדירה'}</em></span>
+                <span className="chatrow-post">{c.title}</span>
+                <span className="chatrow-last">{c.last ? c.last.body : 'עוד לא נשלחו הודעות'}</span>
+              </span>
+              <span className="chatrow-meta">{c.last && <small>{ago(c.last.created_at)}</small>}{unread && <i className="udot2" />}</span>
+            </button>
+          )
+        })}
       </div>}
     </div>
   )

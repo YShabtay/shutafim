@@ -88,7 +88,7 @@ export default function App() {
           <Route path="/" element={<Feed profile={profile} userId={user?.id} pending={notifs.requests.length} />} />
           <Route path="/post/:id" element={<PostPage user={user} profile={profile} />} />
           <Route path="/new" element={isGuest ? <GuestWall /> : user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
-          <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
+          <Route path="/inbox" element={user === undefined ? null : user ? <Inbox msgs={msgs} /> : <Login />} />
           <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat /> : <Login />} />
           <Route path="/notifications" element={user === undefined ? null : user ? <Notifications notifs={notifs} /> : <Login />} />
           <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account isAdmin={isAdmin} profile={profile} pending={notifs.requests.length} /> : <Login />} />

@@ -25,7 +25,15 @@ export function ChatDockProvider({ children }) {
     return true
   }
   const close = id => setWins(w => w.filter(x => x.id !== id))
-  const toggle = id => setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
+  // בנייד מזעור הוא חזרה לאייקון ההודעות: החלון מתכווץ לשם והשיחה נמצאת ברשימת ההודעות
+  const toggle = id => {
+    if (isMobile()) {
+      setWins(w => w.map(x => (x.id === id ? { ...x, closing: true } : x)))
+      setTimeout(() => close(id), 260)
+      return
+    }
+    setWins(w => w.map(x => (x.id === id ? { ...x, min: !x.min } : x)))
+  }
   // המקלדת בנייד מכווצת רק את אזור התצוגה, כך שהחלון נשאר מעליה ושדה ההקלדה לא נחסם
   useEffect(() => {
     const vv = window.visualViewport
@@ -39,13 +47,13 @@ export function ChatDockProvider({ children }) {
   return (
     <Ctx.Provider value={{ openChat, isOpen, notifyIncoming }}>
       {children}
-      {openWin && <div className="dockback" onClick={() => toggle(openWin.id)} />}
-      <div className={'dock' + (openWin ? ' open' : '')}>{wins.map(w => <ChatWindow key={w.id} cid={w.id} min={w.min} onClose={() => close(w.id)} onToggle={() => toggle(w.id)} />)}</div>
+      {openWin && !openWin.closing && <div className="dockback" onClick={() => toggle(openWin.id)} />}
+      <div className={'dock' + (openWin ? ' open' : '')}>{wins.map(w => <ChatWindow key={w.id} cid={w.id} min={w.min} closing={w.closing} onClose={() => close(w.id)} onToggle={() => toggle(w.id)} />)}</div>
     </Ctx.Provider>
   )
 }
 
-export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
+export function ChatWindow({ cid, min, closing, onClose, onToggle, page = false }) {
   const [me, setMe] = useState(null)
   const [conv, setConv] = useState(undefined)
   const [msgs, setMsgs] = useState([])
@@ -86,7 +94,7 @@ export function ChatWindow({ cid, min, onClose, onToggle, page = false }) {
   const otherId = conv?.other?.user_id
   const refreshConv = async () => setConv(await api.getConversation(cid))
   return (
-    <section className={'cwin' + (min ? ' min' : '') + (unread ? ' unread' : '') + (page ? ' page' : '')} aria-label={'צ\'אט עם ' + name}>
+    <section className={'cwin' + (min ? ' min' : '') + (unread ? ' unread' : '') + (page ? ' page' : '') + (closing ? ' closing' : '')} aria-label={'צ\'אט עם ' + name}>
       <header onClick={page ? undefined : onToggle}>
         {page && <button aria-label="חזרה" onClick={e => { e.stopPropagation(); onClose() }}><Icon n="arrow" size={16} /></button>}
         {conv?.other && <Avatar profile={conv.other} size={30} />}
