@@ -23,12 +23,16 @@ import { ConfirmHost } from './components/confirm'
 import { ReportHost } from './components/report'
 import { isComplete } from './match'
 import Login from './components/Login'
+import GuestWall from './components/GuestWall'
 import ResetPassword from './pages/ResetPassword'
 import Legal from './pages/Legal'
 import Debug from './pages/Debug'
 import EditPost from './pages/EditPost'
 import Logo from './components/Logo'
 import Icon from './components/Icon'
+
+// אורחים לא מתחברים: כל מסך שדורש חשבון מציג להם הסבר והרשמה
+const Gate = isGuest ? GuestWall : Login
 
 export default function App() {
   const [user, setUser] = useState(undefined)
@@ -42,7 +46,7 @@ export default function App() {
   useEffect(() => { if (user) api.isAdmin().then(setIsAdmin).catch(() => setIsAdmin(false)); else setIsAdmin(false) }, [user?.id])
   const totalUnread = notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length + msgs.unread.size
   useEffect(() => { document.title = (totalUnread ? `(${totalUnread}) ` : '') + 'שותפים – מצאו שותפים לדירה' }, [totalUnread])
-  useEffect(() => api.onAuth(setUser), [])
+  useEffect(() => api.onAuth(u => setUser(isGuest ? null : u)), []) // אורח הוא צופה בלבד, כמו מי שלא מחובר
   useEffect(() => { const h = () => nav('/reset'); window.addEventListener('shutafim:recovery', h); return () => window.removeEventListener('shutafim:recovery', h) }, [])
   useEffect(() => {
     if (user === undefined) return
@@ -56,8 +60,8 @@ export default function App() {
         <div className="topactions">
           <nav className={'mainnav ' + (user ? 'in' : 'out')}>
             {user === null && <>
-              <button className="btn ghost" onClick={() => nav('/login')}>התחברות</button>
-              <button className="btn primary" onClick={() => nav('/login?mode=signup')}>הרשמה</button>
+              <button className="btn ghost" onClick={() => isGuest ? exitGuest('/login') : nav('/login')}>התחברות</button>
+              <button className="btn primary" onClick={() => isGuest ? exitGuest('/login?mode=signup') : nav('/login?mode=signup')}>הרשמה</button>
             </>}
             {user && <>
               <MessagesMenu msgs={msgs} />
@@ -74,7 +78,7 @@ export default function App() {
       {user && <Toast notifs={notifs} />}
       {user && <MessageToast msgs={msgs} userId={user.id} />}
       {isGuest ? (
-        <div className="demo">מצב אורח: הכול נשמר רק בדפדפן שלכם ואף אחד אחר לא רואה את זה. <button className="linkbtn" onClick={exitGuest}>יציאה ממצב אורח</button></div>
+        <div className="demo">אתם גולשים כאורחים, אפשר רק לצפות במודעות. <button className="linkbtn" onClick={() => exitGuest('/login?mode=signup')}>הרשמה בחינם</button></div>
       ) : api.mode === 'demo' ? (
         <div className="demo">מצב דמו – הנתונים נשמרים בדפדפן שלך בלבד. חברו Supabase כדי לעלות לאוויר (ראו README).</div>
       ) : user === null && hasBackend ? (
@@ -84,20 +88,20 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Feed profile={profile} userId={user?.id} pending={notifs.requests.length} />} />
           <Route path="/post/:id" element={<PostPage user={user} profile={profile} />} />
-          <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Login /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
-          <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Login />} />
-          <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat /> : <Login />} />
-          <Route path="/notifications" element={user === undefined ? null : user ? <Notifications notifs={notifs} /> : <Login />} />
-          <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account isAdmin={isAdmin} profile={profile} pending={notifs.requests.length} /> : <Login />} />
-          <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Login />} />
-          <Route path="/reset" element={user ? <ResetPassword /> : <Login />} />
-          <Route path="/admin" element={user === undefined ? null : user ? <Admin /> : <Login />} />
-          <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Login />} />
+          <Route path="/new" element={user === undefined || (user && profile === undefined) ? null : !user ? <Gate /> : isComplete(profile) ? <NewPost /> : <Navigate to="/profile?next=/new" replace />} />
+          <Route path="/inbox" element={user === undefined ? null : user ? <Inbox /> : <Gate />} />
+          <Route path="/chat/:id" element={user === undefined ? null : user ? <Chat /> : <Gate />} />
+          <Route path="/notifications" element={user === undefined ? null : user ? <Notifications notifs={notifs} /> : <Gate />} />
+          <Route path="/account" element={user === undefined || (user && profile === undefined) ? null : user ? <Account isAdmin={isAdmin} profile={profile} pending={notifs.requests.length} /> : <Gate />} />
+          <Route path="/login" element={user === undefined ? null : user ? <Navigate to="/" replace /> : <Gate />} />
+          <Route path="/reset" element={user ? <ResetPassword /> : <Gate />} />
+          <Route path="/admin" element={user === undefined ? null : user ? <Admin /> : <Gate />} />
+          <Route path="/debug" element={user === undefined ? null : user ? <Debug /> : <Gate />} />
           <Route path="/legal/:doc" element={<Legal />} />
-          <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Login />} />
-          <Route path="/post/:id/edit" element={user === undefined ? null : user ? <EditPost /> : <Login />} />
-          <Route path="/post/:id/requests" element={user === undefined ? null : user ? <Requests /> : <Login />} />
-          <Route path="/mine" element={user ? <MyPosts /> : <Login />} />
+          <Route path="/profile" element={user === undefined || (user && profile === undefined) ? null : user ? <Profile profile={profile} onSaved={setProfile} /> : <Gate />} />
+          <Route path="/post/:id/edit" element={user === undefined ? null : user ? <EditPost /> : <Gate />} />
+          <Route path="/post/:id/requests" element={user === undefined ? null : user ? <Requests /> : <Gate />} />
+          <Route path="/mine" element={user ? <MyPosts /> : <Gate />} />
         </Routes>
       </main>
       {user && <BottomBar msgBadge={msgs.unread.size} notifBadge={notifs.requests.length + notifs.list.filter(n => !n.read && (n.kind === 'accepted' || n.kind === 'declined' || n.kind === 'chatting')).length} />}

@@ -10,4 +10,5 @@ export const isGuest = hasBackend && readGuest()
 export const api = hasBackend && !isGuest ? remote : local
 
 export function enterGuest() { try { localStorage.setItem(GUEST_KEY, '1') } catch {} location.assign('/') }
-export function exitGuest() { try { localStorage.removeItem(GUEST_KEY) } catch {} location.assign('/') }
+// יציאה ממצב אורח, ומעבר לעמוד מסוים (למשל להרשמה)
+export function exitGuest(to) { try { localStorage.removeItem(GUEST_KEY) } catch {} location.assign(typeof to === 'string' ? to : '/') }
