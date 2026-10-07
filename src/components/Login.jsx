@@ -41,15 +41,17 @@ function Ads() {
   const [posts, setPosts] = useState(null)
   useEffect(() => { api.listPosts().then(l => setPosts(l.slice(0, 12))).catch(() => setPosts([])) }, [])
   const list = posts && posts.length >= 4 ? posts : FALLBACK
-  const cols = [list.filter((_, i) => i % 2 === 0), list.filter((_, i) => i % 2 === 1)].map(c => {
-    let a = c
-    while (a.length < 4) a = [...a, ...c]
+  // כל עמודה מציגה את כל המודעות, בסדר שונה, ופעמיים כדי שהלולאה תהיה חלקה
+  const cols = [0, 1, 2, 3, 4].map(i => {
+    const k = (i * 2) % list.length
+    let a = [...list.slice(k), ...list.slice(0, k)]
+    while (a.length < 5) a = [...a, ...a]
     return [...a, ...a]
   })
   return (
     <div className="mq" aria-hidden="true">
       {cols.map((c, i) => (
-        <div key={i} className={'mqcol ' + (i ? 'down' : 'up')}>
+        <div key={i} className={'mqcol ' + (i % 2 ? 'down' : 'up')}>
           {c.map((p, j) => (
             <div key={p.id + '-' + j} className="mqcard">
               <div className="mqph">{p.photos?.[0] ? <img src={p.photos[0]} alt="" loading="lazy" /> : <Placeholder />}</div>
@@ -66,19 +68,8 @@ function Ads() {
 function Shell({ children }) {
   return (
     <div className="authpage">
+      <Ads />
       <div className="authform">{children}</div>
-      <aside className="authside">
-        <Ads />
-        <div className="authside-in">
-          <h2>הבית הבא שלך מתחיל בשותפים הנכונים</h2>
-          <ul>
-            <li><Icon n="users" size={20} /> פרופיל אישי שמראה מי אתם באמת</li>
-            <li><Icon n="sliders" size={20} /> אחוז התאמה לכל דירה</li>
-            <li><Icon n="chat" size={20} /> צ'אט פרטי אחרי אישור בקשה</li>
-            <li><Icon n="lock" size={20} /> הטלפון והמייל שלכם נשארים פרטיים</li>
-          </ul>
-        </div>
-      </aside>
     </div>
   )
 }
